@@ -16,7 +16,7 @@ A react native UI component that enables “keyboard tracking" for this view and
 
 ![](https://github.com/wix/react-native-keyboard-tracking-view/blob/master/img/add_proj.png)
 
-- Add `libTrackingView.a` to your target's **Linked Frameworks and Libraries**.
+- Add `libKeyboardTrackingView.a` to your target's **Linked Frameworks and Libraries**.
 
 ![](https://github.com/wix/react-native-keyboard-tracking-view/blob/master/img/add_lib.png)
 
