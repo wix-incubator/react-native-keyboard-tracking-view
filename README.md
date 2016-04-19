@@ -3,16 +3,22 @@ A react native UI component that enables “keyboard tracking" for this view and
 
 ## Installation
 
-1. Install using `npm`:
-```
-npm i react-native-keyboard-tracking-view --save
-```
+- Install using `npm`:
 
-2. Locate the module lib folder in your node modules: `PROJECT_DIR/node_modules/react-native-keyboard-tracking-view/lib`.
+	```
+	npm i react-native-keyboard-tracking-view --save
+	```
 
-3. Drag the `KeyboardTrackingView.xcodeproj` project file into your project
+- Locate the module lib folder in your node modules:
+	`PROJECT_DIR/node_modules/react-native-keyboard-tracking-view/lib`.
 
-4. Add `libTrackingView.a` to your target's **Linked Frameworks and Libraries**.
+- Drag the `KeyboardTrackingView.xcodeproj` project file into your project
+
+![](https://github.com/wix/react-native-keyboard-tracking-view/blob/master/img/add_proj.png)
+
+- Add `libTrackingView.a` to your target's **Linked Frameworks and Libraries**.
+
+![](https://github.com/wix/react-native-keyboard-tracking-view/blob/master/img/add_proj.png)
 
 ## How To Use
 Require the native component:
