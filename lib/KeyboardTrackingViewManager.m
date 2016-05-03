@@ -45,10 +45,22 @@
   [self startTracking];
 }
 
+- (NSArray*)getAllSubviewsForView:(UIView*)view
+{
+    NSMutableArray *allSubviews = [NSMutableArray new];
+    for (UIView *subview in view.subviews)
+    {
+        [allSubviews addObject:subview];
+        [allSubviews addObjectsFromArray:[self getAllSubviewsForView:subview]];
+    }
+    return allSubviews;
+}
+
 -(void)setInputAccessoryForTextInput:(BOOL)startTracking
 {
   BOOL registerFrameChangeNotif = NO;
-  for (UIView *subview in self.subviews)
+  NSArray *allSubviews = [self getAllSubviewsForView:self];
+  for (UIView *subview in allSubviews)
   {
     if ([subview isKindOfClass:[RCTTextField class]])
     {
