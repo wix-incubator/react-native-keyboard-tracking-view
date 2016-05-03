@@ -12,6 +12,7 @@
 #import "RCTTextField.h"
 
 @interface KeyboardTrackingView : UIView
+@property (nonatomic) BOOL trackInteractive;
 @end
 
 @implementation KeyboardTrackingView
@@ -21,6 +22,7 @@
   self = [super init];
   if (self)
   {
+      _trackInteractive = NO;
   }
   return self;
 }
@@ -30,6 +32,12 @@
   [self stopTracking];
 }
 
+-(void)setTrackInteractive:(BOOL)trackInteractive
+{
+    _trackInteractive = trackInteractive;
+    [self setInputAccessoryForTextInput:trackInteractive];
+}
+
 - (void)didMoveToWindow
 {
   [super didMoveToWindow];
@@ -37,22 +45,10 @@
   [self startTracking];
 }
 
-- (NSArray*)getAllSubviewsForView:(UIView*)view
-{
-    NSMutableArray *allSubviews = [NSMutableArray new];
-    for (UIView *subview in view.subviews)
-    {
-        [allSubviews addObject:subview];
-        [allSubviews addObjectsFromArray:[self getAllSubviewsForView:subview]];
-    }
-    return allSubviews;
-}
-
 -(void)setInputAccessoryForTextInput:(BOOL)startTracking
 {
   BOOL registerFrameChangeNotif = NO;
-  NSArray *allSubviews = [self getAllSubviewsForView:self];
-  for (UIView *subview in allSubviews)
+  for (UIView *subview in self.subviews)
   {
     if ([subview isKindOfClass:[RCTTextField class]])
     {
@@ -90,7 +86,10 @@
   [notifCenter addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
   [notifCenter addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
 
-  [self setInputAccessoryForTextInput:YES];
+  if (self.trackInteractive)
+  {
+    [self setInputAccessoryForTextInput:YES];
+  }
 }
 
 -(void)stopTracking
@@ -149,6 +148,11 @@ RCT_EXPORT_MODULE()
 - (UIView *)view
 {
   return [[KeyboardTrackingView alloc] init];
+}
+
+RCT_CUSTOM_VIEW_PROPERTY(trackInteractive, BOOL, KeyboardTrackingView)
+{
+    view.trackInteractive = [RCTConvert BOOL:json];
 }
 
 @end
