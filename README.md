@@ -39,6 +39,13 @@ Now use it in your jsx as the parent of the views you whish to track the keyboar
 </KeyboardTrackingView>
 ```
 
+##Native Properties
+
+Attribute | Description
+-------- | -----------
+trackInteractive | boolean property that enables tracking of the keyboard when it's dismissed interactively. False by default. Why? When using an external keyboard (BT), you still get the keyboard events and the view just hovers when you focus the input. Also, if you're not using interactive style of dismissing the KB (or if you don't have an input inside this view) it doesn't make sense to track it anyway. (This is caused because of the usage of inputAccessory to be able to track the keyboard interactive change and it introduces this bug)
+
+
 ## Example Project
 
 Check out the full example project [here](https://github.com/wix/react-native-keyboard-tracking-view/tree/master/example).
