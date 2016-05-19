@@ -3,20 +3,18 @@
  * https://github.com/facebook/react-native
  * @flow
  */
-
-import React, {
+import React, { Component } from 'react';
+import {
   AppRegistry,
-  Component,
   StyleSheet,
   Text,
   View,
   TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  requireNativeComponent
 } from 'react-native';
 
-const KeyboardTrackingView = requireNativeComponent('KeyboardTrackingView', null);
+import {KeyboardTrackingView} from 'react-native-keyboard-tracking-view';
 
 class example extends Component {
   render() {
