@@ -24,11 +24,7 @@ A react native UI component that enables “keyboard tracking" for this view and
 Require the native component:
 
 ```js
-import React, {
-  requireNativeComponent
-} from 'react-native';
-
-const KeyboardTrackingView = requireNativeComponent('KeyboardTrackingView', null);
+import {KeyboardTrackingView} from 'react-native-keyboard-tracking-view';
 ```
 
 Now use it in your jsx as the parent of the views you whish to track the keyboard (usually wraps a TextInput at the bottom of the screen):
