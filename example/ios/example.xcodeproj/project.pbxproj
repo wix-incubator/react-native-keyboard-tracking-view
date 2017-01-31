@@ -25,6 +25,7 @@
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		D89903251DEDAF0F003D98B2 /* libKeyboardTrackingView.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D89903051DEDAF08003D98B2 /* libKeyboardTrackingView.a */; };
 		D899032F1DEDAF3F003D98B2 /* libRCTAnimation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D899032C1DEDAF39003D98B2 /* libRCTAnimation.a */; };
+		D8F3089D1E413B26005F2279 /* libRNBlur.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D8F3089C1E413B15005F2279 /* libRNBlur.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -175,6 +176,13 @@
 			remoteGlobalIDString = 2D2A28201D9B03D100D4039D;
 			remoteInfo = "RCTAnimation-tvOS";
 		};
+		D8F3089B1E413B15005F2279 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D8F308971E413B15005F2279 /* RNBlur.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = A68BD7BC1BC31318005F02DF;
+			remoteInfo = RNBlur;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -201,6 +209,7 @@
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
 		D89903001DEDAF08003D98B2 /* KeyboardTrackingView.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = KeyboardTrackingView.xcodeproj; path = "../node_modules/react-native-keyboard-tracking-view/lib/KeyboardTrackingView.xcodeproj"; sourceTree = "<group>"; };
 		D89903261DEDAF39003D98B2 /* RCTAnimation.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTAnimation.xcodeproj; path = "../node_modules/react-native/Libraries/NativeAnimation/RCTAnimation.xcodeproj"; sourceTree = "<group>"; };
+		D8F308971E413B15005F2279 /* RNBlur.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNBlur.xcodeproj; path = "../node_modules/react-native-blur/ios/RNBlur.xcodeproj"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -216,6 +225,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D8F3089D1E413B26005F2279 /* libRNBlur.a in Frameworks */,
 				D899032F1DEDAF3F003D98B2 /* libRCTAnimation.a in Frameworks */,
 				D89903251DEDAF0F003D98B2 /* libKeyboardTrackingView.a in Frameworks */,
 				146834051AC3E58100842450 /* libReact.a in Frameworks */,
@@ -346,6 +356,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				D8F308971E413B15005F2279 /* RNBlur.xcodeproj */,
 				D89903261DEDAF39003D98B2 /* RCTAnimation.xcodeproj */,
 				D89903001DEDAF08003D98B2 /* KeyboardTrackingView.xcodeproj */,
 				146833FF1AC3E56700842450 /* React.xcodeproj */,
@@ -405,6 +416,14 @@
 			children = (
 				D899032C1DEDAF39003D98B2 /* libRCTAnimation.a */,
 				D899032E1DEDAF39003D98B2 /* libRCTAnimation-tvOS.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D8F308981E413B15005F2279 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D8F3089C1E413B15005F2279 /* libRNBlur.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -522,6 +541,10 @@
 				{
 					ProductGroup = 146834001AC3E56700842450 /* Products */;
 					ProjectRef = 146833FF1AC3E56700842450 /* React.xcodeproj */;
+				},
+				{
+					ProductGroup = D8F308981E413B15005F2279 /* Products */;
+					ProjectRef = D8F308971E413B15005F2279 /* RNBlur.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -671,6 +694,13 @@
 			fileType = archive.ar;
 			path = "libRCTAnimation-tvOS.a";
 			remoteRef = D899032D1DEDAF39003D98B2 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		D8F3089C1E413B15005F2279 /* libRNBlur.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNBlur.a;
+			remoteRef = D8F3089B1E413B15005F2279 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
