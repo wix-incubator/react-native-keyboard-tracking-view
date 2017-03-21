@@ -1,6 +1,8 @@
 # react-native-keyboard-tracking-view
 A react native UI component that enables “keyboard tracking" for this view and it's sub-views. Would typically be used when you have a TextInput inside this view.
 
+![Demo](https://github.com/wix/react-native-keyboard-tracking-view/blob/master/img/demo.gif)
+
 ## Installation
 
 - Install using `npm`:
