@@ -19,6 +19,7 @@ import {
 } from 'react-native';
 import {BlurView} from 'react-native-blur';
 import {KeyboardTrackingView} from 'react-native-keyboard-tracking-view';
+import {AutoGrowingTextInput} from 'react-native-autogrow-textinput';
 
 const screenSize = Dimensions.get('window');
 const trackInteractive = false;
@@ -30,7 +31,12 @@ const Images = [
 const KeyboardToolbar = ({onActionPress, onLayout, inputRefCallback}) =>
   <KeyboardTrackingView style={styles.trackingToolbarContainer} onLayout={onLayout} trackInteractive={trackInteractive}>
     <BlurView blurType="xlight" style={styles.blurContainer}>
-      <TextInput style={styles.textInput} placeholder={'Message'} ref={(r) => inputRefCallback && inputRefCallback(r)}/>
+      <AutoGrowingTextInput
+        maxHeight={200}
+        style={styles.textInput}
+        ref={(r) => inputRefCallback && inputRefCallback(r)}
+        placeholder={'Message'}
+      />
       <TouchableOpacity style={styles.sendButton} onPress={onActionPress}>
         <Text>Action</Text>
       </TouchableOpacity>
