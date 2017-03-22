@@ -15,13 +15,13 @@
 	if (self.superview)
 	{
 		[self.superview removeObserver:self forKeyPath:@"center"];
-		//    [self.superview removeObserver:self forKeyPath:@"frame"];
+		[self.superview removeObserver:self forKeyPath:@"bounds"];
 	}
 	
 	if (newSuperview != nil)
 	{
 		[newSuperview addObserver:self forKeyPath:@"center" options:0 context:nil];
-		//    [newSuperview addObserver:self forKeyPath:@"frame" options:0 context:nil];
+		[newSuperview addObserver:self forKeyPath:@"bounds" options:0 context:nil];
 	}
 	
 	[super willMoveToSuperview:newSuperview];
@@ -29,7 +29,7 @@
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-	if ((object == self.superview) && ([keyPath isEqualToString:@"center"] || [keyPath isEqualToString:@"frame"]))
+	if ((object == self.superview) && ([keyPath isEqualToString:@"center"] || [keyPath isEqualToString:@"bounds"]))
 	{
 		[[NSNotificationCenter defaultCenter] postNotificationName:ObservingInputAccessoryViewFrameDidChangeNotification object:@(self.superview.frame.origin.y)];
 	}
@@ -38,7 +38,7 @@
 -(void)dealloc
 {
 	[self.superview removeObserver:self forKeyPath:@"center"];
-	[self.superview removeObserver:self forKeyPath:@"frame"];
+	[self.superview removeObserver:self forKeyPath:@"bounds"];
 }
 
 @end
