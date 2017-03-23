@@ -17,8 +17,9 @@ import {
 	Dimensions,
 	PixelRatio
 } from 'react-native';
-import { BlurView } from 'react-native-blur';
-import { KeyboardTrackingView } from 'react-native-keyboard-tracking-view';
+import {BlurView} from 'react-native-blur';
+import {KeyboardTrackingView} from 'react-native-keyboard-tracking-view';
+import {AutoGrowingTextInput} from 'react-native-autogrow-textinput';
 
 const screenSize = Dimensions.get('window');
 const trackInteractive = true;
@@ -27,20 +28,20 @@ const Images = [
 	'https://static.pexels.com/photos/60628/flower-garden-blue-sky-hokkaido-japan-60628.jpeg'
 ];
 
-const KeyboardToolbar = ({ onActionPress, onLayout, inputRefCallback, trackingRefCallback}) =>
-	<KeyboardTrackingView
-		style={styles.trackingToolbarContainer}
-		onLayout={onLayout}
-		trackInteractive={trackInteractive}
-		ref={(r) => trackingRefCallback && trackingRefCallback(r)}
-	>
-		<BlurView blurType="xlight" style={styles.blurContainer}>
-			<TextInput style={styles.textInput} placeholder={'Message'} ref={(r) => inputRefCallback && inputRefCallback(r)} />
-			<TouchableOpacity style={styles.sendButton} onPress={onActionPress}>
-				<Text>Action</Text>
-			</TouchableOpacity>
-		</BlurView>
-	</KeyboardTrackingView>;
+const KeyboardToolbar = ({onActionPress, onLayout, inputRefCallback}) =>
+  <KeyboardTrackingView style={styles.trackingToolbarContainer} onLayout={onLayout} trackInteractive={trackInteractive}>
+    <BlurView blurType="xlight" style={styles.blurContainer}>
+      <AutoGrowingTextInput
+        maxHeight={200}
+        style={styles.textInput}
+        ref={(r) => inputRefCallback && inputRefCallback(r)}
+        placeholder={'Message'}
+      />
+      <TouchableOpacity style={styles.sendButton} onPress={onActionPress}>
+        <Text>Action</Text>
+      </TouchableOpacity>
+    </BlurView>
+  </KeyboardTrackingView>;
 
 class example extends Component {
 	constructor(props) {
