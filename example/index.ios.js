@@ -27,8 +27,13 @@ const Images = [
 	'https://static.pexels.com/photos/60628/flower-garden-blue-sky-hokkaido-japan-60628.jpeg'
 ];
 
-const KeyboardToolbar = ({ onActionPress, onLayout, inputRefCallback }) =>
-	<KeyboardTrackingView style={styles.trackingToolbarContainer} onLayout={onLayout} trackInteractive={trackInteractive}>
+const KeyboardToolbar = ({ onActionPress, onLayout, inputRefCallback, trackingRefCallback}) =>
+	<KeyboardTrackingView
+		style={styles.trackingToolbarContainer}
+		onLayout={onLayout}
+		trackInteractive={trackInteractive}
+		ref={(r) => trackingRefCallback && trackingRefCallback(r)}
+	>
 		<BlurView blurType="xlight" style={styles.blurContainer}>
 			<TextInput style={styles.textInput} placeholder={'Message'} ref={(r) => inputRefCallback && inputRefCallback(r)} />
 			<TouchableOpacity style={styles.sendButton} onPress={onActionPress}>
@@ -44,7 +49,7 @@ class example extends Component {
 		this._keyboardWillHide = this._keyboardWillHide.bind(this);
 		this.state = {
 			keyboardHeight: 0,
-			keyboardToolbarHeight: 0
+			keyboardToolbarHeight: 0,
 		};
 	}
 
@@ -53,6 +58,10 @@ class example extends Component {
 			Keyboard.addListener('keyboardWillShow', this._keyboardWillShow),
 			Keyboard.addListener('keyboardWillHide', this._keyboardWillHide)
 		];
+	}
+
+  componentDidMount() {
+		this.trackingView.setScrollViewRef(this.scrollView);
 	}
 
 	componentWillUnmount() {
@@ -73,15 +82,20 @@ class example extends Component {
 	render() {
 		return (
 			<View style={styles.container}>
-				<ScrollView contentContainerStyle={styles.scrollContainer}
+				<ScrollView
+					contentContainerStyle={styles.scrollContainer}
 					contentInset={{ bottom: (this.state.keyboardHeight) }}
 					keyboardDismissMode={trackInteractive ? 'interactive' : 'none'}
+					ref={(r) => this.scrollView = r}
 				>
 					<Text style={styles.welcome}>Keyboard tracking view example</Text>
 					{Images.map((image, index) => (<Image style={styles.image} source={{ uri: image }} key={index} />))}
 				</ScrollView>
-				<KeyboardToolbar onActionPress={() => this._textInput.blur()}
-					inputRefCallback={(r) => this._textInput = r} />
+				<KeyboardToolbar
+					onActionPress={() => this._textInput.blur()}
+					inputRefCallback={(r) => this._textInput = r}
+					trackingRefCallback={(r) => this.trackingView = r}
+				/>
 			</View>
 		);
 	}

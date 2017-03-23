@@ -8,7 +8,10 @@
 
 #import <Foundation/Foundation.h>
 #import "RCTViewManager.h"
+#import "RCTBridgeModule.h"
 
 @interface KeyboardTrackingViewManager : RCTViewManager
+@end
 
+@interface KeyboardTrackingManager : NSObject <RCTBridgeModule>
 @end

@@ -10,6 +10,9 @@
 #import "ObservingInputAccessoryView.h"
 #import "RCTTextView.h"
 #import "RCTTextField.h"
+#import "RCTScrollView.h"
+#import "RCTBridge.h"
+#import "RCTUIManager.h"
 
 @interface KeyboardTrackingView : UIView
 {
@@ -17,6 +20,7 @@
 }
 
 @property (nonatomic) BOOL trackInteractive;
+@property (nonatomic, strong) UIScrollView *scrollViewToManage;
 
 @end
 
@@ -188,6 +192,8 @@
 
 @implementation KeyboardTrackingViewManager
 
+@synthesize bridge = _bridge;
+
 RCT_EXPORT_MODULE()
 
 - (UIView *)view
@@ -198,6 +204,28 @@ RCT_EXPORT_MODULE()
 RCT_CUSTOM_VIEW_PROPERTY(trackInteractive, BOOL, KeyboardTrackingView)
 {
 	view.trackInteractive = [RCTConvert BOOL:json];
+}
+
+@end
+
+@implementation KeyboardTrackingManager
+
+@synthesize bridge=_bridge;
+
+- (dispatch_queue_t)methodQueue
+{
+    return dispatch_get_main_queue();
+}
+
+RCT_EXPORT_MODULE(KeyboardTrackingManager)
+
+RCT_EXPORT_METHOD(setScrollViewRef:(nonnull NSNumber *)scrollviewReactTag trackingViewReactTag:(nonnull NSNumber *)trackingViewReactTag)
+{
+    KeyboardTrackingView* trackingView = [self.bridge.uiManager viewForReactTag:trackingViewReactTag];
+    RCTScrollView* rctScrollView = [self.bridge.uiManager viewForReactTag:scrollviewReactTag];
+    if(trackingView && rctScrollView) {
+        trackingView.scrollViewToManage = rctScrollView.scrollView;
+    }
 }
 
 @end
