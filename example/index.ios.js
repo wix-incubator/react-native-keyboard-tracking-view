@@ -28,20 +28,25 @@ const Images = [
 	'https://static.pexels.com/photos/60628/flower-garden-blue-sky-hokkaido-japan-60628.jpeg'
 ];
 
-const KeyboardToolbar = ({onActionPress, onLayout, inputRefCallback}) =>
-  <KeyboardTrackingView style={styles.trackingToolbarContainer} onLayout={onLayout} trackInteractive={trackInteractive}>
-    <BlurView blurType="xlight" style={styles.blurContainer}>
+const KeyboardToolbar = ({ onActionPress, onLayout, inputRefCallback, trackingRefCallback}) =>
+	<KeyboardTrackingView
+		style={styles.trackingToolbarContainer}
+		onLayout={onLayout}
+		trackInteractive={trackInteractive}
+		ref={(r) => trackingRefCallback && trackingRefCallback(r)}
+	>
+		<BlurView blurType="xlight" style={styles.blurContainer}>
       <AutoGrowingTextInput
         maxHeight={200}
         style={styles.textInput}
         ref={(r) => inputRefCallback && inputRefCallback(r)}
         placeholder={'Message'}
       />
-      <TouchableOpacity style={styles.sendButton} onPress={onActionPress}>
-        <Text>Action</Text>
-      </TouchableOpacity>
-    </BlurView>
-  </KeyboardTrackingView>;
+			<TouchableOpacity style={styles.sendButton} onPress={onActionPress}>
+				<Text>Action</Text>
+			</TouchableOpacity>
+		</BlurView>
+	</KeyboardTrackingView>;
 
 class example extends Component {
 	constructor(props) {
@@ -61,7 +66,7 @@ class example extends Component {
 		];
 	}
 
-  componentDidMount() {
+	componentDidMount() {
 		this.trackingView.setScrollViewRef(this.scrollView);
 	}
 
@@ -85,7 +90,6 @@ class example extends Component {
 			<View style={styles.container}>
 				<ScrollView
 					contentContainerStyle={styles.scrollContainer}
-					contentInset={{ bottom: (this.state.keyboardHeight) }}
 					keyboardDismissMode={trackInteractive ? 'interactive' : 'none'}
 					ref={(r) => this.scrollView = r}
 				>

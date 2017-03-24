@@ -13,14 +13,18 @@
 #import "RCTScrollView.h"
 #import "RCTBridge.h"
 #import "RCTUIManager.h"
+#import "UIView+React.h"
 
 @interface KeyboardTrackingView : UIView
 {
 	ObservingInputAccessoryView* _observingAccessoryView;
 }
 
-@property (nonatomic) BOOL trackInteractive;
 @property (nonatomic, strong) UIScrollView *scrollViewToManage;
+
+@end
+
+@interface KeyboardTrackingView () <ObservingInputAccessoryViewDelegate>
 
 @end
 
@@ -29,56 +33,68 @@
 -(instancetype)init
 {
 	self = [super init];
+	
 	if (self)
 	{
-		_trackInteractive = NO;
+		[self addObserver:self forKeyPath:@"bounds" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:NULL];
 	}
+	
 	return self;
+}
+
+- (void)didUpdateReactSubviews
+{
+	[super didUpdateReactSubviews];
+	
+	NSArray<UIView*>* allSubviews = [self getAllSubviewsForView:self];
+	
+	for (UIView* subview in allSubviews) {
+		if ([subview isKindOfClass:[RCTTextField class]])
+		{
+			UIView *inputAccesorry = self.observingAccessoryView;
+			[((RCTTextField*)subview) setInputAccessoryView:inputAccesorry];
+		}
+		else if ([subview isKindOfClass:[RCTTextView class]])
+		{
+			UITextView *textView = [subview valueForKey:@"_textView"];
+			if (textView != nil)
+			{
+				UIView *inputAccesorry = self.observingAccessoryView;
+				[textView setInputAccessoryView:inputAccesorry];
+			}
+		}
+	}
+	
+	[self _updateScrollViewInsets];
 }
 
 -(void)dealloc
 {
-	[self stopTracking];
-	
 	[self removeObserver:self forKeyPath:@"bounds"];
 }
 
--(void)setTrackInteractive:(BOOL)trackInteractive
-{
-	_trackInteractive = trackInteractive;
-	dispatch_async(dispatch_get_main_queue(), ^{
-		[self setInputAccessoryForTextInput:trackInteractive];
-	});
-}
-
-- (UIView*)observingAccessoryView
+- (ObservingInputAccessoryView*)observingAccessoryView
 {
 	if(_observingAccessoryView == nil)
 	{
 		_observingAccessoryView = [ObservingInputAccessoryView new];
+		_observingAccessoryView.translatesAutoresizingMaskIntoConstraints = NO;
+		_observingAccessoryView.userInteractionEnabled = YES;
+		_observingAccessoryView.delegate = self;
 	}
 	
 	return _observingAccessoryView;
 }
 
-- (void)didMoveToWindow
-{
-	[super didMoveToWindow];
-	
-	[self startTracking];
-	
-	[self addObserver:self forKeyPath:@"bounds" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:NULL];
-}
-
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context
 {
-	self.observingAccessoryView.bounds = self.bounds;
+	self.observingAccessoryView.height = self.bounds.size.height;
 }
 
 - (NSArray*)getAllSubviewsForView:(UIView*)view
 {
 	NSMutableArray *allSubviews = [NSMutableArray new];
-	for (UIView *subview in view.subviews)
+	for (UIView *subview in view.reactSubviews)
 	{
 		[allSubviews addObject:subview];
 		[allSubviews addObjectsFromArray:[self getAllSubviewsForView:subview]];
@@ -86,106 +102,22 @@
 	return allSubviews;
 }
 
--(void)setInputAccessoryForTextInput:(BOOL)startTracking
+- (void)observingInputAccessoryViewDidChangeFrame:(ObservingInputAccessoryView*)observingInputAccessoryView
 {
-	BOOL registerFrameChangeNotif = NO;
-	NSArray *allSubviews = [self getAllSubviewsForView:self];
-	
-	if(startTracking)
-	{
-		self.observingAccessoryView.bounds = self.bounds;
-	}
-	
-	for (UIView *subview in allSubviews)
-	{
-		if ([subview isKindOfClass:[RCTTextField class]])
-		{
-			UIView *inputAccesorry = startTracking ? self.observingAccessoryView : nil;
-			[((RCTTextField*)subview) setInputAccessoryView:inputAccesorry];
-			registerFrameChangeNotif = YES;
-			break;
-		}
-		else if ([subview isKindOfClass:[RCTTextView class]])
-		{
-			UITextView *textView = [subview valueForKey:@"_textView"];
-			if (textView != nil)
-			{
-				UIView *inputAccesorry = startTracking ? self.observingAccessoryView : nil;
-				[textView setInputAccessoryView:inputAccesorry];
-				registerFrameChangeNotif = YES;
-				break;
-			}
-		}
-	}
-	
-	if (startTracking && registerFrameChangeNotif)
-	{
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onKeyboardFrameChangedForView:) name:ObservingInputAccessoryViewFrameDidChangeNotification object:nil];
-	}
-	else
-	{
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:ObservingInputAccessoryViewFrameDidChangeNotification object:nil];
-	}
-}
-
--(void)startTracking
-{
-	NSNotificationCenter *notifCenter = [NSNotificationCenter defaultCenter];
-	[notifCenter addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
-	[notifCenter addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
-	
-	if (self.trackInteractive)
-	{
-		[self setInputAccessoryForTextInput:YES];
-	}
-}
-
--(void)stopTracking
-{
-	NSNotificationCenter *notifCenter = [NSNotificationCenter defaultCenter];
-	[notifCenter removeObserver:self name:UIKeyboardWillShowNotification object:nil];
-	[notifCenter removeObserver:self name:UIKeyboardWillHideNotification object:nil];
-	
-	[self setInputAccessoryForTextInput:NO];
-}
-
--(void)animateViewToTrackKeyboard:(NSNotification *)notification keyboardShown:(BOOL)keyboardShown
-{
-	NSDictionary *info = [notification userInfo];
-	NSTimeInterval animationDuration = [info[UIKeyboardAnimationDurationUserInfoKey] doubleValue];
-	
-	UIViewAnimationCurve keyboardTransitionAnimationCurve;
-	[[notification.userInfo valueForKey:UIKeyboardAnimationCurveUserInfoKey] getValue:&keyboardTransitionAnimationCurve];
-	keyboardTransitionAnimationCurve = keyboardTransitionAnimationCurve<<16;
-	
-	CGRect keyboardFrame = [info[UIKeyboardFrameEndUserInfoKey] CGRectValue];
-	keyboardFrame.size.height -= self.observingAccessoryView.bounds.size.height;
-	
-	[UIView animateWithDuration:animationDuration delay:0.0 options:(UIViewAnimationOptions)keyboardTransitionAnimationCurve animations:^
-	 {
-		 self.transform = keyboardShown ? CGAffineTransformMakeTranslation(0, -keyboardFrame.size.height) : CGAffineTransformIdentity;
-	 } completion:nil];
-}
-
--(void)onKeyboardFrameChangedForView:(NSNotification*)notification
-{
-	CGFloat accessoryTranslation = -(self.window.bounds.size.height - [notification.object doubleValue] - self.observingAccessoryView.bounds.size.height);
+	CGFloat accessoryTranslation = MIN(0, -self.observingAccessoryView.keyboardHeight);
 	self.transform = CGAffineTransformMakeTranslation(0, accessoryTranslation);
+	
+	[self _updateScrollViewInsets];
 }
 
-- (void)keyboardWillShow:(NSNotification *)notification
+- (void)_updateScrollViewInsets
 {
-	[self animateViewToTrackKeyboard:notification keyboardShown:YES];
-}
-
-- (void)keyboardWillHide:(NSNotification *)notification
-{
-	[self animateViewToTrackKeyboard:notification keyboardShown:NO];
-}
-
-- (void)onKeyboardFrameChanged:(NSNotification *)notification
-{
-	[self onKeyboardFrameChangedForView:notification.object];
+	UIEdgeInsets insets = self.scrollViewToManage.contentInset;
+	insets.bottom = MAX(self.bounds.size.height, self.observingAccessoryView.keyboardHeight + self.observingAccessoryView.height);
+	self.scrollViewToManage.contentInset = insets;
+	insets = self.scrollViewToManage.scrollIndicatorInsets;
+	insets.bottom = MAX(self.bounds.size.height, self.observingAccessoryView.keyboardHeight + self.observingAccessoryView.height);
+	self.scrollViewToManage.scrollIndicatorInsets = insets;
 }
 
 @end
@@ -201,11 +133,6 @@ RCT_EXPORT_MODULE()
 	return [[KeyboardTrackingView alloc] init];
 }
 
-RCT_CUSTOM_VIEW_PROPERTY(trackInteractive, BOOL, KeyboardTrackingView)
-{
-	view.trackInteractive = [RCTConvert BOOL:json];
-}
-
 @end
 
 @implementation KeyboardTrackingManager
@@ -214,18 +141,18 @@ RCT_CUSTOM_VIEW_PROPERTY(trackInteractive, BOOL, KeyboardTrackingView)
 
 - (dispatch_queue_t)methodQueue
 {
-    return dispatch_get_main_queue();
+	return dispatch_get_main_queue();
 }
 
 RCT_EXPORT_MODULE(KeyboardTrackingManager)
 
 RCT_EXPORT_METHOD(setScrollViewRef:(nonnull NSNumber *)scrollviewReactTag trackingViewReactTag:(nonnull NSNumber *)trackingViewReactTag)
 {
-    KeyboardTrackingView* trackingView = [self.bridge.uiManager viewForReactTag:trackingViewReactTag];
-    RCTScrollView* rctScrollView = [self.bridge.uiManager viewForReactTag:scrollviewReactTag];
-    if(trackingView && rctScrollView) {
-        trackingView.scrollViewToManage = rctScrollView.scrollView;
-    }
+	KeyboardTrackingView* trackingView = (id)[self.bridge.uiManager viewForReactTag:trackingViewReactTag];
+	RCTScrollView* rctScrollView = (id)[self.bridge.uiManager viewForReactTag:scrollviewReactTag];
+	if(trackingView && rctScrollView) {
+		trackingView.scrollViewToManage = rctScrollView.scrollView;
+	}
 }
 
 @end

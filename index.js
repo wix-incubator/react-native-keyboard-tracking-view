@@ -1,3 +1,3 @@
 import KeyboardTrackingView from './src/KeyboardTrackingView';
 
-export {KeyboardTrackingView};
+export { KeyboardTrackingView };

@@ -10,6 +10,26 @@
 
 @implementation ObservingInputAccessoryView
 
+- (instancetype)init
+{
+	self = [super init];
+	
+	if(self)
+	{
+		self.autoresizingMask = UIViewAutoresizingFlexibleHeight;
+		
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_keyboardWillShowNotification:) name:UIKeyboardWillShowNotification object:nil];
+		
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_keyboardDidShowNotification:) name:UIKeyboardDidShowNotification object:nil];
+		
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_keyboardWillHideNotification:) name:UIKeyboardWillHideNotification object:nil];
+		
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_keyboardDidHideNotification:) name:UIKeyboardDidHideNotification object:nil];
+	}
+	
+	return self;
+}
+
 - (void)willMoveToSuperview:(UIView *)newSuperview
 {
 	if (self.superview)
@@ -31,7 +51,9 @@
 {
 	if ((object == self.superview) && ([keyPath isEqualToString:@"center"] || [keyPath isEqualToString:@"bounds"]))
 	{
-		[[NSNotificationCenter defaultCenter] postNotificationName:ObservingInputAccessoryViewFrameDidChangeNotification object:@(self.superview.frame.origin.y)];
+		_keyboardHeight = self.window.bounds.size.height - self.superview.frame.origin.y - self.intrinsicContentSize.height;
+		
+		[self.delegate observingInputAccessoryViewDidChangeFrame:self];
 	}
 }
 
@@ -39,6 +61,48 @@
 {
 	[self.superview removeObserver:self forKeyPath:@"center"];
 	[self.superview removeObserver:self forKeyPath:@"bounds"];
+	
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (CGSize)intrinsicContentSize
+{
+	return CGSizeMake(self.bounds.size.width, _keyboardState == KeyboardStateWillShow || _keyboardState == KeyboardStateWillHide ? 0 : self.bounds.size.height);
+}
+
+- (void)setHeight:(CGFloat)height
+{
+	_height = height;
+	
+	[self invalidateIntrinsicContentSize];
+}
+
+- (void)_keyboardWillShowNotification:(NSNotification*)notification
+{
+	_keyboardState = KeyboardStateWillShow;
+	
+	[self invalidateIntrinsicContentSize];
+}
+
+- (void)_keyboardDidShowNotification:(NSNotification*)notification
+{
+	_keyboardState = KeyboardStateShown;
+	
+	[self invalidateIntrinsicContentSize];
+}
+
+- (void)_keyboardWillHideNotification:(NSNotification*)notification
+{
+	_keyboardState = KeyboardStateWillHide;
+	
+	[self invalidateIntrinsicContentSize];
+}
+
+- (void)_keyboardDidHideNotification:(NSNotification*)notification
+{
+	_keyboardState = KeyboardStateHidden;
+	
+	[self invalidateIntrinsicContentSize];
 }
 
 @end

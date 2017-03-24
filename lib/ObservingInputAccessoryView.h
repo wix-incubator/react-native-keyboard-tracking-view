@@ -8,7 +8,28 @@
 
 #import <UIKit/UIKit.h>
 
-static NSString *const ObservingInputAccessoryViewFrameDidChangeNotification = @"ObservingInputAccessoryViewFrameDidChangeNotification";
+typedef NS_ENUM(NSUInteger, KeyboardState) {
+	KeyboardStateHidden,
+	KeyboardStateWillShow,
+	KeyboardStateShown,
+	KeyboardStateWillHide
+};
+
+@class ObservingInputAccessoryView;
+
+@protocol ObservingInputAccessoryViewDelegate <NSObject>
+
+- (void)observingInputAccessoryViewDidChangeFrame:(ObservingInputAccessoryView*)observingInputAccessoryView;
+
+@end
 
 @interface ObservingInputAccessoryView : UIView
+
+@property (nonatomic, weak) id<ObservingInputAccessoryViewDelegate> delegate;
+
+@property (nonatomic) CGFloat height;
+
+@property (nonatomic, readonly) CGFloat keyboardHeight;
+@property (nonatomic, readonly) KeyboardState keyboardState;
+
 @end
