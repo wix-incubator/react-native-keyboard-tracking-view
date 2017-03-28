@@ -78,8 +78,6 @@
 	if(_observingAccessoryView == nil)
 	{
 		_observingAccessoryView = [ObservingInputAccessoryView new];
-		_observingAccessoryView.translatesAutoresizingMaskIntoConstraints = NO;
-		_observingAccessoryView.userInteractionEnabled = YES;
 		_observingAccessoryView.delegate = self;
 	}
 	

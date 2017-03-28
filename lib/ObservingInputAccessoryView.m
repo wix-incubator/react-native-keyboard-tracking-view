@@ -16,6 +16,8 @@
 	
 	if(self)
 	{
+        self.userInteractionEnabled = NO;
+        self.translatesAutoresizingMaskIntoConstraints = NO;
 		self.autoresizingMask = UIViewAutoresizingFlexibleHeight;
 		
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_keyboardWillShowNotification:) name:UIKeyboardWillShowNotification object:nil];
@@ -67,7 +69,7 @@
 
 - (CGSize)intrinsicContentSize
 {
-	return CGSizeMake(self.bounds.size.width, _keyboardState == KeyboardStateWillShow || _keyboardState == KeyboardStateWillHide ? 0 : self.bounds.size.height);
+	return CGSizeMake(self.bounds.size.width, _keyboardState == KeyboardStateWillShow || _keyboardState == KeyboardStateWillHide ? 0 : _height);
 }
 
 - (void)setHeight:(CGFloat)height
