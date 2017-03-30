@@ -49,57 +49,19 @@ const KeyboardToolbar = ({ onActionPress, onLayout, inputRefCallback, trackingRe
 	</KeyboardTrackingView>;
 
 class example extends Component {
-	constructor(props) {
-		super(props);
-		this._keyboardWillShow = this._keyboardWillShow.bind(this);
-		this._keyboardWillHide = this._keyboardWillHide.bind(this);
-		this.state = {
-			keyboardHeight: 0,
-			keyboardToolbarHeight: 0,
-		};
-	}
-
-	componentWillMount() {
-		this.keyboardEventListeners = [
-			Keyboard.addListener('keyboardWillShow', this._keyboardWillShow),
-			Keyboard.addListener('keyboardWillHide', this._keyboardWillHide)
-		];
-	}
-
-	componentDidMount() {
-		this.trackingView.setScrollViewRef(this.scrollView);
-	}
-
-	componentWillUnmount() {
-		this.keyboardEventListeners.forEach((eventListener) => eventListener.remove());
-	}
-
-	_keyboardWillShow(event) {
-		const keyboardHeight = event.endCoordinates.height;
-		if (this.state.keyboardHeight !== keyboardHeight) {
-			this.setState({ keyboardHeight });
-		}
-	}
-
-	_keyboardWillHide() {
-		this.setState({ keyboardHeight: 0 });
-	}
-
 	render() {
 		return (
 			<View style={styles.container}>
 				<ScrollView
 					contentContainerStyle={styles.scrollContainer}
 					keyboardDismissMode={trackInteractive ? 'interactive' : 'none'}
-					ref={(r) => this.scrollView = r}
 				>
 					<Text style={styles.welcome}>Keyboard tracking view example</Text>
 					{Images.map((image, index) => (<Image style={styles.image} source={{ uri: image }} key={index} />))}
 				</ScrollView>
 				<KeyboardToolbar
-					onActionPress={() => this._textInput.blur()}
+					onActionPress={() => this._textInput._textInput.blur()}
 					inputRefCallback={(r) => this._textInput = r}
-					trackingRefCallback={(r) => this.trackingView = r}
 				/>
 			</View>
 		);

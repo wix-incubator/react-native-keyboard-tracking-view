@@ -12,16 +12,7 @@ export default class KeyboardTrackingView extends React.Component {
 
 	constructor(props) {
 		super(props);
-    this.setScrollViewRef = this.setScrollViewRef.bind(this);
 	}
-
-  setScrollViewRef(scrollViewRef) {
-		if(scrollViewRef) {
-      const scrollHandle = findNodeHandle(scrollViewRef.getScrollResponder());
-      const trackingViewHandle = findNodeHandle(this);
-      KeyboardTrackingManager.setScrollViewRef(scrollHandle, trackingViewHandle);
-		}
-  }
 
 	render() {
 		return (

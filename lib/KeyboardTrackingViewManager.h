@@ -12,6 +12,3 @@
 
 @interface KeyboardTrackingViewManager : RCTViewManager
 @end
-
-@interface KeyboardTrackingManager : NSObject <RCTBridgeModule>
-@end

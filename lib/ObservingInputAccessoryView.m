@@ -27,6 +27,8 @@
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_keyboardWillHideNotification:) name:UIKeyboardWillHideNotification object:nil];
 		
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_keyboardDidHideNotification:) name:UIKeyboardDidHideNotification object:nil];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_keyboardWillChangeFrameNotification:) name:UIKeyboardWillChangeFrameNotification object:nil];
 	}
 	
 	return self;
@@ -105,6 +107,18 @@
 	_keyboardState = KeyboardStateHidden;
 	
 	[self invalidateIntrinsicContentSize];
+}
+
+- (void)_keyboardWillChangeFrameNotification:(NSNotification*)notification
+{
+    if(self.window)
+    {
+        return;
+    }
+    
+    _keyboardHeight = [notification.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue].size.height;
+    
+    [self.delegate observingInputAccessoryViewDidChangeFrame:self];
 }
 
 @end
