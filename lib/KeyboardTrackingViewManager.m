@@ -88,6 +88,7 @@
     }
     
     object_setClass(subview, _newClass);
+    [subview reloadInputViews];
 }
 
 -(void)didMoveToWindow
@@ -108,6 +109,7 @@
                 {
                     UIView *inputAccesorry = self.observingAccessoryView;
                     [((RCTTextField*)subview) setInputAccessoryView:inputAccesorry];
+                    [((RCTTextField*)subview) reloadInputViews];
                 }
                 else if ([subview isKindOfClass:[RCTTextView class]])
                 {
@@ -116,6 +118,7 @@
                     {
                         UIView *inputAccesorry = self.observingAccessoryView;
                         [textView setInputAccessoryView:inputAccesorry];
+                        [textView reloadInputViews];
                     }
                 }
                 else if ([subview isKindOfClass:[UIWebView class]])
@@ -198,12 +201,15 @@
 
 - (void)_updateScrollViewInsets
 {
-    UIEdgeInsets insets = self.scrollViewToManage.contentInset;
-    insets.bottom = MAX(self.bounds.size.height, self.observingAccessoryView.keyboardHeight + self.observingAccessoryView.height);
-    self.scrollViewToManage.contentInset = insets;
-    insets = self.scrollViewToManage.scrollIndicatorInsets;
-    insets.bottom = MAX(self.bounds.size.height, self.observingAccessoryView.keyboardHeight + self.observingAccessoryView.height);
-    self.scrollViewToManage.scrollIndicatorInsets = insets;
+    if(self.scrollViewToManage != nil)
+    {
+        UIEdgeInsets insets = self.scrollViewToManage.contentInset;
+        insets.bottom = MAX(self.bounds.size.height, self.observingAccessoryView.keyboardHeight + self.observingAccessoryView.height);
+        self.scrollViewToManage.contentInset = insets;
+        insets = self.scrollViewToManage.scrollIndicatorInsets;
+        insets.bottom = MAX(self.bounds.size.height, self.observingAccessoryView.keyboardHeight + self.observingAccessoryView.height);
+        self.scrollViewToManage.scrollIndicatorInsets = insets;
+    }
 }
 
 @end
