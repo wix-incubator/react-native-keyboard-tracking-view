@@ -9,6 +9,9 @@
 #import "ObservingInputAccessoryView.h"
 
 @implementation ObservingInputAccessoryView
+{
+    CGFloat _previousKeyboardHeight;
+}
 
 - (instancetype)init
 {
@@ -20,18 +23,20 @@
         self.translatesAutoresizingMaskIntoConstraints = NO;
 		self.autoresizingMask = UIViewAutoresizingFlexibleHeight;
 		
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_keyboardWillShowNotification:) name:UIKeyboardWillShowNotification object:nil];
-		
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_keyboardDidShowNotification:) name:UIKeyboardDidShowNotification object:nil];
-		
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_keyboardWillHideNotification:) name:UIKeyboardWillHideNotification object:nil];
-		
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_keyboardDidHideNotification:) name:UIKeyboardDidHideNotification object:nil];
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_keyboardWillChangeFrameNotification:) name:UIKeyboardWillChangeFrameNotification object:nil];
+        [self registerForKeyboardNotifications];
 	}
 	
 	return self;
+}
+
+- (void) registerForKeyboardNotifications
+{
+    NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
+    [notificationCenter addObserver:self selector:@selector(_keyboardWillShowNotification:) name:UIKeyboardWillShowNotification object:nil];
+    [notificationCenter addObserver:self selector:@selector(_keyboardDidShowNotification:) name:UIKeyboardDidShowNotification object:nil];
+    [notificationCenter addObserver:self selector:@selector(_keyboardWillHideNotification:) name:UIKeyboardWillHideNotification object:nil];
+    [notificationCenter addObserver:self selector:@selector(_keyboardDidHideNotification:) name:UIKeyboardDidHideNotification object:nil];
+    [notificationCenter addObserver:self selector:@selector(_keyboardWillChangeFrameNotification:) name:UIKeyboardWillChangeFrameNotification object:nil];
 }
 
 - (void)willMoveToSuperview:(UIView *)newSuperview
@@ -39,13 +44,11 @@
 	if (self.superview)
 	{
 		[self.superview removeObserver:self forKeyPath:@"center"];
-		[self.superview removeObserver:self forKeyPath:@"bounds"];
 	}
 	
 	if (newSuperview != nil)
 	{
-		[newSuperview addObserver:self forKeyPath:@"center" options:0 context:nil];
-		[newSuperview addObserver:self forKeyPath:@"bounds" options:0 context:nil];
+		[newSuperview addObserver:self forKeyPath:@"center" options:NSKeyValueObservingOptionNew context:nil];
 	}
 	
 	[super willMoveToSuperview:newSuperview];
@@ -53,9 +56,19 @@
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-	if ((object == self.superview) && ([keyPath isEqualToString:@"center"] || [keyPath isEqualToString:@"bounds"]))
+	if ((object == self.superview) && ([keyPath isEqualToString:@"center"]))
 	{
-		_keyboardHeight = self.window.bounds.size.height - self.superview.frame.origin.y - self.intrinsicContentSize.height;
+        CGFloat centerY = self.superview.center.y;
+        
+        if([keyPath isEqualToString:@"center"])
+        {
+            centerY = [change[NSKeyValueChangeNewKey] CGPointValue].y;
+        }
+        
+        CGFloat boundsH = self.superview.bounds.size.height;
+        
+        _previousKeyboardHeight = _keyboardHeight;
+		_keyboardHeight = MAX(0, self.window.bounds.size.height - (centerY - boundsH / 2) - self.intrinsicContentSize.height);
 		
 		[self.delegate observingInputAccessoryViewDidChangeFrame:self];
 	}
@@ -64,7 +77,6 @@
 -(void)dealloc
 {
 	[self.superview removeObserver:self forKeyPath:@"center"];
-	[self.superview removeObserver:self forKeyPath:@"bounds"];
 	
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 }
@@ -86,6 +98,8 @@
 	_keyboardState = KeyboardStateWillShow;
 	
 	[self invalidateIntrinsicContentSize];
+    
+    [self.delegate observingInputAccessoryViewKeyboardWillAppear:self keyboardDelta:_keyboardHeight - _previousKeyboardHeight];
 }
 
 - (void)_keyboardDidShowNotification:(NSNotification*)notification

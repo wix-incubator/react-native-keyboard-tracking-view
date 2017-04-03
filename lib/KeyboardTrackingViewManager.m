@@ -16,6 +16,12 @@
 #import "UIView+React.h"
 #import <objc/runtime.h>
 
+typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
+    KeyboardTrackingScrollBehaviorNone,
+    KeyboardTrackingScrollBehaviorScrollToBottomInvertedOnly,
+    KeyboardTrackingScrollBehaviorFixedOffset
+};
+
 @interface KeyboardTrackingView : UIView
 {
     ObservingInputAccessoryView* _observingAccessoryView;
@@ -23,6 +29,8 @@
 }
 
 @property (nonatomic, strong) UIScrollView *scrollViewToManage;
+@property (nonatomic) BOOL scrollIsInverted;
+@property (nonatomic) KeyboardTrackingScrollBehavior scrollBehavior;
 
 @end
 
@@ -103,6 +111,7 @@
                 if(_scrollViewToManage == nil && [subview isKindOfClass:[UIScrollView class]])
                 {
                     _scrollViewToManage = subview;
+                    _scrollIsInverted = CGAffineTransformEqualToTransform(_scrollViewToManage.superview.transform, CGAffineTransformMakeScale(1, -1));
                 }
                 
                 if ([subview isKindOfClass:[RCTTextField class]])
@@ -199,19 +208,57 @@
     [self _updateScrollViewInsets];
 }
 
+-(void)observingInputAccessoryViewKeyboardWillAppear:(ObservingInputAccessoryView *)observingInputAccessoryView keyboardDelta:(CGFloat)delta
+{
+    if(self.scrollViewToManage != nil)
+    {
+        if(self.scrollBehavior == KeyboardTrackingScrollBehaviorScrollToBottomInvertedOnly && _scrollIsInverted)
+        {
+            self.scrollViewToManage.contentOffset = CGPointMake(self.scrollViewToManage.contentOffset.x, -self.scrollViewToManage.contentInset.top);
+        }
+        else if(self.scrollBehavior == KeyboardTrackingScrollBehaviorFixedOffset)
+        {
+            self.scrollViewToManage.contentOffset = CGPointMake(self.scrollViewToManage.contentOffset.x, self.scrollViewToManage.contentOffset.y + delta * (self.scrollIsInverted ? -1 : 1));
+        }
+    }
+}
+
 - (void)_updateScrollViewInsets
 {
     if(self.scrollViewToManage != nil)
     {
         UIEdgeInsets insets = self.scrollViewToManage.contentInset;
-        insets.bottom = MAX(self.bounds.size.height, self.observingAccessoryView.keyboardHeight + self.observingAccessoryView.height);
+        CGFloat bottomInset = MAX(self.bounds.size.height, self.observingAccessoryView.keyboardHeight + self.observingAccessoryView.height);
+        if(self.scrollIsInverted)
+        {
+            insets.top = bottomInset;
+        }
+        else
+        {
+            insets.bottom = bottomInset;
+        }
         self.scrollViewToManage.contentInset = insets;
+        
         insets = self.scrollViewToManage.scrollIndicatorInsets;
-        insets.bottom = MAX(self.bounds.size.height, self.observingAccessoryView.keyboardHeight + self.observingAccessoryView.height);
+        if(self.scrollIsInverted)
+        {
+            insets.top = bottomInset;
+        }
+        else
+        {
+            insets.bottom = bottomInset;
+        }
         self.scrollViewToManage.scrollIndicatorInsets = insets;
     }
 }
 
+@end
+
+@implementation RCTConvert (KeyboardTrackingScrollBehavior)
+RCT_ENUM_CONVERTER(KeyboardTrackingScrollBehavior, (@{ @"KeyboardTrackingScrollBehaviorNone": @(KeyboardTrackingScrollBehaviorNone),
+                                                       @"KeyboardTrackingScrollBehaviorScrollToBottomInvertedOnly": @(KeyboardTrackingScrollBehaviorScrollToBottomInvertedOnly),
+                                                       @"KeyboardTrackingScrollBehaviorFixedOffset": @(KeyboardTrackingScrollBehaviorFixedOffset)}),
+                   KeyboardTrackingScrollBehaviorNone, unsignedIntegerValue)
 @end
 
 @implementation KeyboardTrackingViewManager
@@ -219,6 +266,17 @@
 @synthesize bridge = _bridge;
 
 RCT_EXPORT_MODULE()
+
+RCT_REMAP_VIEW_PROPERTY(scrollBehavior, scrollBehavior, KeyboardTrackingScrollBehavior)
+
+- (NSDictionary<NSString *, id> *)constantsToExport
+{
+    return @{
+             @"KeyboardTrackingScrollBehaviorNone": @(KeyboardTrackingScrollBehaviorNone),
+             @"KeyboardTrackingScrollBehaviorScrollToBottomInvertedOnly": @(KeyboardTrackingScrollBehaviorScrollToBottomInvertedOnly),
+             @"KeyboardTrackingScrollBehaviorFixedOffset": @(KeyboardTrackingScrollBehaviorFixedOffset),
+             };
+}
 
 - (UIView *)view
 {
