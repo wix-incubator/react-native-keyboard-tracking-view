@@ -3,20 +3,8 @@
  * https://github.com/facebook/react-native
  * @flow
  */
-import React, { Component } from 'react';
-import {
-	AppRegistry,
-	StyleSheet,
-	Text,
-	View,
-	Image,
-	ScrollView,
-	TextInput,
-	TouchableOpacity,
-	Keyboard,
-	Dimensions,
-	PixelRatio
-} from 'react-native';
+import React, {Component} from 'react';
+import {AppRegistry, StyleSheet, Text, View, Image, ScrollView, TextInput, TouchableOpacity, Keyboard, Dimensions, PixelRatio} from 'react-native';
 import {BlurView} from 'react-native-blur';
 import {KeyboardTrackingView} from 'react-native-keyboard-tracking-view';
 import {AutoGrowingTextInput} from 'react-native-autogrow-textinput';
