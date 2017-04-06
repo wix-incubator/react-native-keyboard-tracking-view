@@ -130,7 +130,8 @@
         return;
     }
     
-    _keyboardHeight = [notification.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue].size.height;
+    CGRect endFrame = [notification.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
+    _keyboardHeight = [UIScreen mainScreen].bounds.size.height - endFrame.origin.y;
     
     [self.delegate observingInputAccessoryViewDidChangeFrame:self];
 }
