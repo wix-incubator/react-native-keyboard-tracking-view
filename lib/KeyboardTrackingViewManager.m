@@ -16,6 +16,8 @@
 #import "UIView+React.h"
 #import <objc/runtime.h>
 
+NSUInteger const kInputViewKey = 101010;
+
 typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
     KeyboardTrackingScrollBehaviorNone,
     KeyboardTrackingScrollBehaviorScrollToBottomInvertedOnly,
@@ -26,10 +28,10 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
 {
     ObservingInputAccessoryView* _observingAccessoryView;
     Class _newClass;
+    NSMapTable *_inputViewsMap;
 }
 
 @property (nonatomic, strong) UIScrollView *scrollViewToManage;
-@property (nonatomic, strong) UIView *inputView;
 @property (nonatomic) BOOL scrollIsInverted;
 @property (nonatomic) BOOL revealKeyboardInteractive;
 @property (nonatomic) KeyboardTrackingScrollBehavior scrollBehavior;
@@ -49,6 +51,7 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
     if (self)
     {
         [self addObserver:self forKeyPath:@"bounds" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:NULL];
+        _inputViewsMap = [NSMapTable weakToWeakObjectsMapTable];
     }
     
     return self;
@@ -124,22 +127,20 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
                 
                 if ([subview isKindOfClass:[RCTTextField class]])
                 {
-                    UIView *inputAccesorry = self.observingAccessoryView;
-                    [((RCTTextField*)subview) setInputAccessoryView:inputAccesorry];
+                    [((RCTTextField*)subview) setInputAccessoryView:self.observingAccessoryView];
                     [((RCTTextField*)subview) reloadInputViews];
                     
-                    self.inputView = subview;
+                    [_inputViewsMap setObject:subview forKey:@(kInputViewKey)];
                 }
                 else if ([subview isKindOfClass:[RCTTextView class]])
                 {
                     UITextView *textView = [subview valueForKey:@"_textView"];
                     if (textView != nil)
                     {
-                        UIView *inputAccesorry = self.observingAccessoryView;
-                        [textView setInputAccessoryView:inputAccesorry];
+                        [textView setInputAccessoryView:self.observingAccessoryView];
                         [textView reloadInputViews];
                         
-                        self.inputView = textView;
+                        [_inputViewsMap setObject:textView forKey:@(kInputViewKey)];
                     }
                 }
                 else if ([subview isKindOfClass:[UIWebView class]])
@@ -283,7 +284,8 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
-    if (self.inputView != nil && scrollView.contentOffset.y * (self.scrollIsInverted ? -1 : 1) > (self.scrollIsInverted ? scrollView.contentInset.top : scrollView.contentInset.bottom) + 50 && ![self.inputView isFirstResponder])
+    UIView *inputView = [_inputViewsMap objectForKey:@(kInputViewKey)];
+    if (inputView != nil && scrollView.contentOffset.y * (self.scrollIsInverted ? -1 : 1) > (self.scrollIsInverted ? scrollView.contentInset.top : scrollView.contentInset.bottom) + 50 && ![inputView isFirstResponder])
     {
         for (UIGestureRecognizer *gesture in scrollView.gestureRecognizers)
         {
@@ -294,14 +296,14 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
             }
         }
         
-        if([self.inputView respondsToSelector:@selector(reactWillMakeFirstResponder)])
+        if([inputView respondsToSelector:@selector(reactWillMakeFirstResponder)])
         {
-            [self.inputView performSelector:@selector(reactWillMakeFirstResponder)];
+            [inputView performSelector:@selector(reactWillMakeFirstResponder)];
         }
-        [self.inputView becomeFirstResponder];
-        if([self.inputView respondsToSelector:@selector(reactDidMakeFirstResponder)])
+        [inputView becomeFirstResponder];
+        if([inputView respondsToSelector:@selector(reactDidMakeFirstResponder)])
         {
-            [self.inputView performSelector:@selector(reactDidMakeFirstResponder)];
+            [inputView performSelector:@selector(reactDidMakeFirstResponder)];
         }
     }
 }
