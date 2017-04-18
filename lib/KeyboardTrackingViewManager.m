@@ -69,7 +69,7 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
     
     if ([view isKindOfClass:[RCTRootView class]])
     {
-        return view;
+        return (RCTRootView*)view;
     }
     return nil;
 }
@@ -116,13 +116,13 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
                 
                 if(_scrollViewToManage == nil && [subview isKindOfClass:[UIScrollView class]])
                 {
-                    _scrollViewToManage = subview;
+            _scrollViewToManage = (UIScrollView*)subview;
                     _scrollIsInverted = CGAffineTransformEqualToTransform(_scrollViewToManage.superview.transform, CGAffineTransformMakeScale(1, -1));
                 }
                 
                 if([subview isKindOfClass:[RCTScrollView class]])
                 {
-                    [rctScrollViewsArray addObject:subview];
+            [rctScrollViewsArray addObject:(RCTScrollView*)subview];
                 }
                 
                 if ([subview isKindOfClass:[RCTTextField class]])
