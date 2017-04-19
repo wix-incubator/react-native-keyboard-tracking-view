@@ -17,6 +17,8 @@
 #import <objc/runtime.h>
 
 NSUInteger const kInputViewKey = 101010;
+NSUInteger const kMaxDeferedInitializeAccessoryViews = 15;
+
 
 typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
     KeyboardTrackingScrollBehaviorNone,
@@ -34,6 +36,7 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
 @property (nonatomic, strong) UIScrollView *scrollViewToManage;
 @property (nonatomic) BOOL scrollIsInverted;
 @property (nonatomic) BOOL revealKeyboardInteractive;
+@property (nonatomic) NSUInteger deferedInitializeAccessoryViewsCount;
 @property (nonatomic) KeyboardTrackingScrollBehavior scrollBehavior;
 
 @end
@@ -52,6 +55,7 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
     {
         [self addObserver:self forKeyPath:@"bounds" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:NULL];
         _inputViewsMap = [NSMapTable weakToWeakObjectsMapTable];
+        _deferedInitializeAccessoryViewsCount = 0;
     }
     
     return self;
@@ -104,68 +108,94 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
     [subview reloadInputViews];
 }
 
+- (void)initializeAccessoryViewsAndHandleInsets
+{
+    NSArray<UIView*>* allSubviews = [self getBreadthFirstSubviewsForView:[self getRootView]];
+    NSMutableArray<RCTScrollView*>* rctScrollViewsArray = [NSMutableArray array];
+    
+    for (UIView* subview in allSubviews) {
+        
+        if(_scrollViewToManage == nil && [subview isKindOfClass:[UIScrollView class]])
+        {
+            _scrollViewToManage = (UIScrollView*)subview;
+            _scrollIsInverted = CGAffineTransformEqualToTransform(_scrollViewToManage.superview.transform, CGAffineTransformMakeScale(1, -1));
+        }
+        
+        if([subview isKindOfClass:[RCTScrollView class]])
+        {
+            [rctScrollViewsArray addObject:(RCTScrollView*)subview];
+        }
+        
+        if ([subview isKindOfClass:[RCTTextField class]])
+        {
+            [((RCTTextField*)subview) setInputAccessoryView:self.observingAccessoryView];
+            [((RCTTextField*)subview) reloadInputViews];
+            
+            [_inputViewsMap setObject:subview forKey:@(kInputViewKey)];
+        }
+        else if ([subview isKindOfClass:[RCTTextView class]])
+        {
+            UITextView *textView = [subview valueForKey:@"_textView"];
+            if (textView != nil)
+            {
+                [textView setInputAccessoryView:self.observingAccessoryView];
+                [textView reloadInputViews];
+                
+                [_inputViewsMap setObject:textView forKey:@(kInputViewKey)];
+            }
+        }
+        else if ([subview isKindOfClass:[UIWebView class]])
+        {
+            [self _swizzleWebViewInputAccessory:(UIWebView*)subview];
+        }
+    }
+    
+    if(self.revealKeyboardInteractive)
+    {
+        for (RCTScrollView *scrollView in rctScrollViewsArray)
+        {
+            if(scrollView.scrollView == _scrollViewToManage)
+            {
+                [scrollView removeScrollListener:self];
+                [scrollView addScrollListener:self];
+                break;
+            }
+        }
+    }
+    
+    [self _updateScrollViewInsets];
+}
+
+-(void) deferedInitializeAccessoryViewsAndHandleInsets
+{
+    if(self.window == nil)
+    {
+        return;
+    }
+    
+    if (self.observingAccessoryView.height == 0 && self.deferedInitializeAccessoryViewsCount < kMaxDeferedInitializeAccessoryViews)
+    {
+        self.deferedInitializeAccessoryViewsCount++;
+        
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [self deferedInitializeAccessoryViewsAndHandleInsets];
+        });
+    }
+    else
+    {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self initializeAccessoryViewsAndHandleInsets];
+        });
+    }
+}
+
 -(void)didMoveToWindow
 {
     [super didMoveToWindow];
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NSArray<UIView*>* allSubviews = [self getBreadthFirstSubviewsForView:[self getRootView]];
-            NSMutableArray<RCTScrollView*>* rctScrollViewsArray = [NSMutableArray array];
-            
-            for (UIView* subview in allSubviews) {
-                
-                if(_scrollViewToManage == nil && [subview isKindOfClass:[UIScrollView class]])
-                {
-            _scrollViewToManage = (UIScrollView*)subview;
-                    _scrollIsInverted = CGAffineTransformEqualToTransform(_scrollViewToManage.superview.transform, CGAffineTransformMakeScale(1, -1));
-                }
-                
-                if([subview isKindOfClass:[RCTScrollView class]])
-                {
-            [rctScrollViewsArray addObject:(RCTScrollView*)subview];
-                }
-                
-                if ([subview isKindOfClass:[RCTTextField class]])
-                {
-                    [((RCTTextField*)subview) setInputAccessoryView:self.observingAccessoryView];
-                    [((RCTTextField*)subview) reloadInputViews];
-                    
-                    [_inputViewsMap setObject:subview forKey:@(kInputViewKey)];
-                }
-                else if ([subview isKindOfClass:[RCTTextView class]])
-                {
-                    UITextView *textView = [subview valueForKey:@"_textView"];
-                    if (textView != nil)
-                    {
-                        [textView setInputAccessoryView:self.observingAccessoryView];
-                        [textView reloadInputViews];
-                        
-                        [_inputViewsMap setObject:textView forKey:@(kInputViewKey)];
-                    }
-                }
-                else if ([subview isKindOfClass:[UIWebView class]])
-                {
-                    [self _swizzleWebViewInputAccessory:subview];
-                }
-            }
-            
-            if(self.revealKeyboardInteractive)
-            {
-                for (RCTScrollView *scrollView in rctScrollViewsArray)
-                {
-                    if(scrollView.scrollView == _scrollViewToManage)
-                    {
-                        [scrollView removeScrollListener:self];
-                        [scrollView addScrollListener:self];
-                        break;
-                    }
-                }
-            }
-            
-            [self _updateScrollViewInsets];
-        });
-    });
     
+    self.deferedInitializeAccessoryViewsCount = 0;
+    
+    [self deferedInitializeAccessoryViewsAndHandleInsets];
 }
 
 -(void)dealloc
