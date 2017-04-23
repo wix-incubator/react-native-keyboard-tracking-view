@@ -13,6 +13,22 @@
     CGFloat _previousKeyboardHeight;
 }
 
++(ObservingInputAccessoryView*)sharedInstance
+{
+    static ObservingInputAccessoryView *instance = nil;
+    static dispatch_once_t observingInputAccessoryViewOnceToken = 0;
+    
+    dispatch_once(&observingInputAccessoryViewOnceToken,^
+    {
+        if (instance == nil)
+        {
+            instance = [ObservingInputAccessoryView new];
+        }
+    });
+    
+    return instance;
+}
+
 - (instancetype)init
 {
 	self = [super init];
