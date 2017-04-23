@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		D834CEEE1CC650F000FA5668 /* KeyboardTrackingViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = D834CEEB1CC650F000FA5668 /* KeyboardTrackingViewManager.m */; };
 		D834CEEF1CC650F000FA5668 /* ObservingInputAccessoryView.m in Sources */ = {isa = PBXBuildFile; fileRef = D834CEED1CC650F000FA5668 /* ObservingInputAccessoryView.m */; };
+		D8904E471EA63900001198F0 /* ObservingInputAccessoryView.h in Headers */ = {isa = PBXBuildFile; fileRef = D834CEEC1CC650F000FA5668 /* ObservingInputAccessoryView.h */; };
+		D8904F521EA796A9001198F0 /* ObservingInputAccessoryView.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = D834CEEC1CC650F000FA5668 /* ObservingInputAccessoryView.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -18,6 +20,7 @@
 			dstPath = "include/$(PRODUCT_NAME)";
 			dstSubfolderSpec = 16;
 			files = (
+				D8904F521EA796A9001198F0 /* ObservingInputAccessoryView.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -63,14 +66,26 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		D8904E461EA63897001198F0 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D8904E471EA63900001198F0 /* ObservingInputAccessoryView.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
 		D834CED71CC64F2400FA5668 /* KeyboardTrackingView */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = D834CEE11CC64F2400FA5668 /* Build configuration list for PBXNativeTarget "KeyboardTrackingView" */;
 			buildPhases = (
+				D8904E461EA63897001198F0 /* Headers */,
+				D834CED61CC64F2400FA5668 /* CopyFiles */,
 				D834CED41CC64F2400FA5668 /* Sources */,
 				D834CED51CC64F2400FA5668 /* Frameworks */,
-				D834CED61CC64F2400FA5668 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -227,6 +242,7 @@
 				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = "/usr/local/include/$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};
 			name = Debug;
@@ -241,6 +257,7 @@
 				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = "/usr/local/include/$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
