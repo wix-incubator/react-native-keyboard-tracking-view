@@ -16,6 +16,7 @@
 #import "UIView+React.h"
 #import <objc/runtime.h>
 
+
 NSUInteger const kInputViewKey = 101010;
 NSUInteger const kMaxDeferedInitializeAccessoryViews = 15;
 
@@ -36,6 +37,7 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
 @property (nonatomic) BOOL scrollIsInverted;
 @property (nonatomic) BOOL revealKeyboardInteractive;
 @property (nonatomic) NSUInteger deferedInitializeAccessoryViewsCount;
+@property (nonatomic) CGFloat originalHeight;
 @property (nonatomic) KeyboardTrackingScrollBehavior scrollBehavior;
 
 @end
@@ -163,6 +165,8 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
     }
     
     [self _updateScrollViewInsets];
+    
+    _originalHeight = [ObservingInputAccessoryView sharedInstance].height;
 }
 
 -(void) deferedInitializeAccessoryViewsAndHandleInsets
@@ -273,6 +277,22 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
     }
 }
 
+- (void)_updateScrollViewContentOffset
+{
+    if(self.scrollViewToManage != nil && self.originalHeight > 0 && self.scrollBehavior == KeyboardTrackingScrollBehaviorFixedOffset)
+    {
+        CGFloat newHeight = [ObservingInputAccessoryView sharedInstance].height;
+        CGFloat heightDiff = newHeight - self.originalHeight;
+        if(heightDiff != 0)
+        {
+            [UIView animateWithDuration:0.1 animations:^(){
+                self.scrollViewToManage.contentOffset = CGPointMake(self.scrollViewToManage.contentOffset.x, self.scrollViewToManage.contentOffset.y + heightDiff * (self.scrollIsInverted ? -1 : 1));
+            }];
+            self.originalHeight = newHeight;
+        }
+    }
+}
+
 #pragma mark - ObservingInputAccessoryViewDelegate methods
 
 - (void)observingInputAccessoryViewDidChangeFrame:(ObservingInputAccessoryView*)observingInputAccessoryView
@@ -281,6 +301,7 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
     self.transform = CGAffineTransformMakeTranslation(0, accessoryTranslation);
     
     [self _updateScrollViewInsets];
+    [self _updateScrollViewContentOffset];
 }
 
 -(void)observingInputAccessoryViewKeyboardWillAppear:(ObservingInputAccessoryView *)observingInputAccessoryView keyboardDelta:(CGFloat)delta
