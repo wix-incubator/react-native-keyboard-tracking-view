@@ -8,12 +8,44 @@
 
 #import "KeyboardTrackingViewManager.h"
 #import "ObservingInputAccessoryView.h"
+
+#if __has_include(<React/RCTTextView.h>)
+#import <React/RCTTextView.h>
+#else
 #import "RCTTextView.h"
+#endif
+
+#if __has_include(<React/RCTTextField.h>)
+#import <React/RCTTextField.h>
+#else
 #import "RCTTextField.h"
+#endif
+
+#if __has_include(<React/RCTScrollView.h>)
+#import <React/RCTScrollView.h>
+#else
 #import "RCTScrollView.h"
+#endif
+
+#if __has_include(<React/RCTBridge.h>)
+#import <React/RCTBridge.h>
+#else
 #import "RCTBridge.h"
+#endif
+
+
+#if __has_include(<React/RCTUIManager.h>)
+#import <React/RCTUIManager.h>
+#else
 #import "RCTUIManager.h"
+#endif
+
+#if __has_include(<React/UIView+React.h>)
+#import <React/UIView+React.h>
+#else
 #import "UIView+React.h"
+#endif
+
 #import <objc/runtime.h>
 
 
