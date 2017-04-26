@@ -342,6 +342,9 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
     {
         if(self.scrollBehavior == KeyboardTrackingScrollBehaviorScrollToBottomInvertedOnly && _scrollIsInverted)
         {
+            //stop current scroll before setting the correct one to scroll to bottom (issue #13)
+            [self.scrollViewToManage setContentOffset:self.scrollViewToManage.contentOffset animated:NO];
+            
             self.scrollViewToManage.contentOffset = CGPointMake(self.scrollViewToManage.contentOffset.x, -self.scrollViewToManage.contentInset.top);
         }
         else if(self.scrollBehavior == KeyboardTrackingScrollBehaviorFixedOffset)
