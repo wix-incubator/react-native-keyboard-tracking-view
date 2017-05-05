@@ -358,6 +358,11 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
+    if([ObservingInputAccessoryView sharedInstance].keyboardState != KeyboardStateHidden)
+    {
+        return;
+    }
+    
     UIView *inputView = [_inputViewsMap objectForKey:@(kInputViewKey)];
     if (inputView != nil && scrollView.contentOffset.y * (self.scrollIsInverted ? -1 : 1) > (self.scrollIsInverted ? scrollView.contentInset.top : scrollView.contentInset.bottom) + 50 && ![inputView isFirstResponder])
     {
