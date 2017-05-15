@@ -115,7 +115,10 @@
 	
 	[self invalidateIntrinsicContentSize];
     
-    [self.delegate observingInputAccessoryViewKeyboardWillAppear:self keyboardDelta:_keyboardHeight - _previousKeyboardHeight];
+    if([self.delegate respondsToSelector:@selector(observingInputAccessoryViewKeyboardWillAppear:keyboardDelta:)])
+    {
+        [self.delegate observingInputAccessoryViewKeyboardWillAppear:self keyboardDelta:_keyboardHeight - _previousKeyboardHeight];
+    }
 }
 
 - (void)_keyboardDidShowNotification:(NSNotification*)notification

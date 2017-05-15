@@ -68,6 +68,7 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
 @property (nonatomic, strong) UIScrollView *scrollViewToManage;
 @property (nonatomic) BOOL scrollIsInverted;
 @property (nonatomic) BOOL revealKeyboardInteractive;
+@property (nonatomic) BOOL isDraggingScrollView;
 @property (nonatomic) NSUInteger deferedInitializeAccessoryViewsCount;
 @property (nonatomic) CGFloat originalHeight;
 @property (nonatomic) KeyboardTrackingScrollBehavior scrollBehavior;
@@ -183,16 +184,13 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
         }
     }
     
-    if(self.revealKeyboardInteractive)
+    for (RCTScrollView *scrollView in rctScrollViewsArray)
     {
-        for (RCTScrollView *scrollView in rctScrollViewsArray)
+        if(scrollView.scrollView == _scrollViewToManage)
         {
-            if(scrollView.scrollView == _scrollViewToManage)
-            {
-                [scrollView removeScrollListener:self];
-                [scrollView addScrollListener:self];
-                break;
-            }
+            [scrollView removeScrollListener:self];
+            [scrollView addScrollListener:self];
+            break;
         }
     }
     
@@ -286,6 +284,8 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
     {
         UIEdgeInsets insets = self.scrollViewToManage.contentInset;
         CGFloat bottomInset = MAX(self.bounds.size.height, [ObservingInputAccessoryView sharedInstance].keyboardHeight + [ObservingInputAccessoryView sharedInstance].height);
+        CGFloat originalBottomInset = self.scrollIsInverted ? insets.top : insets.bottom;
+        CGPoint originalOffset = self.scrollViewToManage.contentOffset;
         if(self.scrollIsInverted)
         {
             insets.top = bottomInset;
@@ -295,6 +295,22 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
             insets.bottom = bottomInset;
         }
         self.scrollViewToManage.contentInset = insets;
+        
+        if(self.scrollBehavior == KeyboardTrackingScrollBehaviorScrollToBottomInvertedOnly && _scrollIsInverted)
+        {
+            BOOL fisrtTime = [ObservingInputAccessoryView sharedInstance].keyboardHeight == 0 && [ObservingInputAccessoryView sharedInstance].keyboardState == KeyboardStateHidden;
+            BOOL willOpen = [ObservingInputAccessoryView sharedInstance].keyboardHeight != 0 && [ObservingInputAccessoryView sharedInstance].keyboardState == KeyboardStateHidden;
+            BOOL isOpen = [ObservingInputAccessoryView sharedInstance].keyboardHeight != 0 && [ObservingInputAccessoryView sharedInstance].keyboardState == KeyboardStateShown;
+            if(fisrtTime || willOpen || (isOpen && !self.isDraggingScrollView))
+            {
+                [self.scrollViewToManage setContentOffset:CGPointMake(self.scrollViewToManage.contentOffset.x, -self.scrollViewToManage.contentInset.top) animated:!fisrtTime];
+            }
+        }
+        else if(self.scrollBehavior == KeyboardTrackingScrollBehaviorFixedOffset && !self.isDraggingScrollView)
+        {
+            CGFloat insetsDiff = (bottomInset - originalBottomInset) * (self.scrollIsInverted ? -1 : 1);
+            self.scrollViewToManage.contentOffset = CGPointMake(originalOffset.x, originalOffset.y + insetsDiff);
+        }
         
         insets = self.scrollViewToManage.scrollIndicatorInsets;
         if(self.scrollIsInverted)
@@ -309,22 +325,6 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
     }
 }
 
-- (void)_updateScrollViewContentOffset
-{
-    if(self.scrollViewToManage != nil && self.originalHeight > 0 && self.scrollBehavior == KeyboardTrackingScrollBehaviorFixedOffset)
-    {
-        CGFloat newHeight = [ObservingInputAccessoryView sharedInstance].height;
-        CGFloat heightDiff = newHeight - self.originalHeight;
-        if(heightDiff != 0)
-        {
-            [UIView animateWithDuration:0.1 animations:^(){
-                self.scrollViewToManage.contentOffset = CGPointMake(self.scrollViewToManage.contentOffset.x, self.scrollViewToManage.contentOffset.y + heightDiff * (self.scrollIsInverted ? -1 : 1));
-            }];
-            self.originalHeight = newHeight;
-        }
-    }
-}
-
 #pragma mark - ObservingInputAccessoryViewDelegate methods
 
 - (void)observingInputAccessoryViewDidChangeFrame:(ObservingInputAccessoryView*)observingInputAccessoryView
@@ -333,32 +333,13 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
     self.transform = CGAffineTransformMakeTranslation(0, accessoryTranslation);
     
     [self _updateScrollViewInsets];
-    [self _updateScrollViewContentOffset];
-}
-
--(void)observingInputAccessoryViewKeyboardWillAppear:(ObservingInputAccessoryView *)observingInputAccessoryView keyboardDelta:(CGFloat)delta
-{
-    if(self.scrollViewToManage != nil)
-    {
-        if(self.scrollBehavior == KeyboardTrackingScrollBehaviorScrollToBottomInvertedOnly && _scrollIsInverted)
-        {
-            //stop current scroll before setting the correct one to scroll to bottom (issue #13)
-            [self.scrollViewToManage setContentOffset:self.scrollViewToManage.contentOffset animated:NO];
-            
-            self.scrollViewToManage.contentOffset = CGPointMake(self.scrollViewToManage.contentOffset.x, -self.scrollViewToManage.contentInset.top);
-        }
-        else if(self.scrollBehavior == KeyboardTrackingScrollBehaviorFixedOffset)
-        {
-            self.scrollViewToManage.contentOffset = CGPointMake(self.scrollViewToManage.contentOffset.x, self.scrollViewToManage.contentOffset.y + delta * (self.scrollIsInverted ? -1 : 1));
-        }
-    }
 }
 
 #pragma mark - UIScrollViewDelegate methods
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
-    if([ObservingInputAccessoryView sharedInstance].keyboardState != KeyboardStateHidden)
+    if([ObservingInputAccessoryView sharedInstance].keyboardState != KeyboardStateHidden || !self.revealKeyboardInteractive)
     {
         return;
     }
@@ -385,6 +366,21 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
             [inputView performSelector:@selector(reactDidMakeFirstResponder)];
         }
     }
+}
+
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
+{
+    self.isDraggingScrollView = YES;
+}
+
+- (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset
+{
+    self.isDraggingScrollView = NO;
+}
+
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
+{
+    self.isDraggingScrollView = NO;
 }
 
 @end
