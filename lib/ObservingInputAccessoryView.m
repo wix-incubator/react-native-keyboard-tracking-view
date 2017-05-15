@@ -150,6 +150,8 @@
     _keyboardHeight = [UIScreen mainScreen].bounds.size.height - endFrame.origin.y;
     
     [self.delegate observingInputAccessoryViewDidChangeFrame:self];
+	
+	[self invalidateIntrinsicContentSize];
 }
 
 @end
