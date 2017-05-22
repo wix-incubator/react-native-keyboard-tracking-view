@@ -69,6 +69,7 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
 @property (nonatomic) BOOL scrollIsInverted;
 @property (nonatomic) BOOL revealKeyboardInteractive;
 @property (nonatomic) BOOL isDraggingScrollView;
+@property (nonatomic) BOOL manageScrollView;
 @property (nonatomic) NSUInteger deferedInitializeAccessoryViewsCount;
 @property (nonatomic) CGFloat originalHeight;
 @property (nonatomic) KeyboardTrackingScrollBehavior scrollBehavior;
@@ -91,6 +92,8 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
         _inputViewsMap = [NSMapTable weakToWeakObjectsMapTable];
         _deferedInitializeAccessoryViewsCount = 0;
         [ObservingInputAccessoryView sharedInstance].delegate = self;
+        
+        _manageScrollView = YES;
     }
     
     return self;
@@ -149,15 +152,18 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
     
     for (UIView* subview in allSubviews) {
         
-        if(_scrollViewToManage == nil && [subview isKindOfClass:[UIScrollView class]])
+        if(_manageScrollView)
         {
-            _scrollViewToManage = (UIScrollView*)subview;
-            _scrollIsInverted = CGAffineTransformEqualToTransform(_scrollViewToManage.superview.transform, CGAffineTransformMakeScale(1, -1));
-        }
-        
-        if([subview isKindOfClass:[RCTScrollView class]])
-        {
-            [rctScrollViewsArray addObject:(RCTScrollView*)subview];
+            if(_scrollViewToManage == nil && [subview isKindOfClass:[UIScrollView class]])
+            {
+                _scrollViewToManage = (UIScrollView*)subview;
+                _scrollIsInverted = CGAffineTransformEqualToTransform(_scrollViewToManage.superview.transform, CGAffineTransformMakeScale(1, -1));
+            }
+            
+            if([subview isKindOfClass:[RCTScrollView class]])
+            {
+                [rctScrollViewsArray addObject:(RCTScrollView*)subview];
+            }
         }
         
         if ([subview isKindOfClass:[RCTTextField class]])
@@ -400,6 +406,7 @@ RCT_EXPORT_MODULE()
 
 RCT_REMAP_VIEW_PROPERTY(scrollBehavior, scrollBehavior, KeyboardTrackingScrollBehavior)
 RCT_REMAP_VIEW_PROPERTY(revealKeyboardInteractive, revealKeyboardInteractive, BOOL)
+RCT_REMAP_VIEW_PROPERTY(manageScrollView, manageScrollView, BOOL)
 
 - (NSDictionary<NSString *, id> *)constantsToExport
 {
