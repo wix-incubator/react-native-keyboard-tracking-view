@@ -70,6 +70,7 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
 @property (nonatomic) BOOL revealKeyboardInteractive;
 @property (nonatomic) BOOL isDraggingScrollView;
 @property (nonatomic) BOOL manageScrollView;
+@property (nonatomic) BOOL requiresSameParentToManageScrollView;
 @property (nonatomic) NSUInteger deferedInitializeAccessoryViewsCount;
 @property (nonatomic) CGFloat originalHeight;
 @property (nonatomic) KeyboardTrackingScrollBehavior scrollBehavior;
@@ -154,10 +155,21 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
         
         if(_manageScrollView)
         {
-            if(_scrollViewToManage == nil && [subview isKindOfClass:[UIScrollView class]])
+            if(_scrollViewToManage == nil)
             {
-                _scrollViewToManage = (UIScrollView*)subview;
-                _scrollIsInverted = CGAffineTransformEqualToTransform(_scrollViewToManage.superview.transform, CGAffineTransformMakeScale(1, -1));
+                if(_requiresSameParentToManageScrollView && [subview isKindOfClass:[RCTScrollView class]] && subview.superview == self.superview)
+                {
+                    _scrollViewToManage = ((RCTScrollView*)subview).scrollView;
+                }
+                else if([subview isKindOfClass:[UIScrollView class]])
+                {
+                    _scrollViewToManage = (UIScrollView*)subview;
+                }
+                
+                if(_scrollViewToManage != nil)
+                {
+                    _scrollIsInverted = CGAffineTransformEqualToTransform(_scrollViewToManage.superview.transform, CGAffineTransformMakeScale(1, -1));
+                }
             }
             
             if([subview isKindOfClass:[RCTScrollView class]])
@@ -407,6 +419,7 @@ RCT_EXPORT_MODULE()
 RCT_REMAP_VIEW_PROPERTY(scrollBehavior, scrollBehavior, KeyboardTrackingScrollBehavior)
 RCT_REMAP_VIEW_PROPERTY(revealKeyboardInteractive, revealKeyboardInteractive, BOOL)
 RCT_REMAP_VIEW_PROPERTY(manageScrollView, manageScrollView, BOOL)
+RCT_REMAP_VIEW_PROPERTY(requiresSameParentToManageScrollView, requiresSameParentToManageScrollView, BOOL)
 
 - (NSDictionary<NSString *, id> *)constantsToExport
 {
