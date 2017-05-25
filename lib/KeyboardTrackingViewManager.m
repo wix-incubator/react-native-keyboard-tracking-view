@@ -95,6 +95,8 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
         [ObservingInputAccessoryView sharedInstance].delegate = self;
         
         _manageScrollView = YES;
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(rctContentDidAppearNotification:) name:RCTContentDidAppearNotification object:nil];
     }
     
     return self;
@@ -341,6 +343,18 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
         }
         self.scrollViewToManage.scrollIndicatorInsets = insets;
     }
+}
+
+#pragma RCTRootView notifications
+
+- (void) rctContentDidAppearNotification:(NSNotification*)notification
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if(notification.object == [self getRootView] && _manageScrollView && _scrollViewToManage == nil)
+        {
+            [self initializeAccessoryViewsAndHandleInsets];
+        }
+    });
 }
 
 #pragma mark - ObservingInputAccessoryViewDelegate methods
