@@ -92,7 +92,7 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
         [self addObserver:self forKeyPath:@"bounds" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:NULL];
         _inputViewsMap = [NSMapTable weakToWeakObjectsMapTable];
         _deferedInitializeAccessoryViewsCount = 0;
-        [ObservingInputAccessoryView sharedInstance].delegate = self;
+        [[ObservingInputAccessoryView sharedInstance] addDelegate:self];
         
         _manageScrollView = YES;
         

@@ -11,6 +11,7 @@
 @implementation ObservingInputAccessoryView
 {
     CGFloat _previousKeyboardHeight;
+    NSHashTable *_delegates;
 }
 
 +(ObservingInputAccessoryView*)sharedInstance
@@ -39,6 +40,8 @@
         self.translatesAutoresizingMaskIntoConstraints = NO;
 		self.autoresizingMask = UIViewAutoresizingFlexibleHeight;
 		
+        _delegates = [NSHashTable weakObjectsHashTable];
+        
         [self registerForKeyboardNotifications];
 	}
 	
@@ -86,7 +89,10 @@
         _previousKeyboardHeight = _keyboardHeight;
 		_keyboardHeight = MAX(0, self.window.bounds.size.height - (centerY - boundsH / 2) - self.intrinsicContentSize.height);
 		
-		[self.delegate observingInputAccessoryViewDidChangeFrame:self];
+        [self enumerateDelegates:^(id<ObservingInputAccessoryViewDelegate> delegate)
+         {
+             [delegate observingInputAccessoryViewDidChangeFrame:self];
+         }];
 	}
 }
 
@@ -115,10 +121,13 @@
 	
 	[self invalidateIntrinsicContentSize];
     
-    if([self.delegate respondsToSelector:@selector(observingInputAccessoryViewKeyboardWillAppear:keyboardDelta:)])
-    {
-        [self.delegate observingInputAccessoryViewKeyboardWillAppear:self keyboardDelta:_keyboardHeight - _previousKeyboardHeight];
-    }
+    [self enumerateDelegates:^(id<ObservingInputAccessoryViewDelegate> delegate)
+     {
+         if([delegate respondsToSelector:@selector(observingInputAccessoryViewKeyboardWillAppear:keyboardDelta:)])
+         {
+             [delegate observingInputAccessoryViewKeyboardWillAppear:self keyboardDelta:_keyboardHeight - _previousKeyboardHeight];
+         }
+     }];
 }
 
 - (void)_keyboardDidShowNotification:(NSNotification*)notification
@@ -152,9 +161,27 @@
     CGRect endFrame = [notification.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
     _keyboardHeight = [UIScreen mainScreen].bounds.size.height - endFrame.origin.y;
     
-    [self.delegate observingInputAccessoryViewDidChangeFrame:self];
-	
+    [self enumerateDelegates:^(id<ObservingInputAccessoryViewDelegate> delegate)
+    {
+        [delegate observingInputAccessoryViewDidChangeFrame:self];
+    }];
+    
 	[self invalidateIntrinsicContentSize];
+}
+
+-(void)addDelegate:(id<ObservingInputAccessoryViewDelegate>)delegate
+{
+    [_delegates addObject:delegate];
+}
+
+-(void) enumerateDelegates:(void (^)(id<ObservingInputAccessoryViewDelegate> delegate))execute
+{
+    NSEnumerator *enumerator = [_delegates objectEnumerator];
+    id value;
+    while ((value = [enumerator nextObject]))
+    {
+        execute(value);
+    }
 }
 
 @end
