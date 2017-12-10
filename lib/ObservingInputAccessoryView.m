@@ -8,26 +8,29 @@
 
 #import "ObservingInputAccessoryView.h"
 
-@implementation ObservingInputAccessoryView
-{
-    CGFloat _previousKeyboardHeight;
-    NSHashTable *_delegates;
-}
+@implementation ObservingInputAccessoryViewManager
 
-+(ObservingInputAccessoryView*)sharedInstance
++(ObservingInputAccessoryViewManager*)sharedInstance
 {
-    static ObservingInputAccessoryView *instance = nil;
-    static dispatch_once_t observingInputAccessoryViewOnceToken = 0;
+    static ObservingInputAccessoryViewManager *instance = nil;
+    static dispatch_once_t observingInputAccessoryViewManagerOnceToken = 0;
     
-    dispatch_once(&observingInputAccessoryViewOnceToken,^
+    dispatch_once(&observingInputAccessoryViewManagerOnceToken,^
     {
         if (instance == nil)
         {
-            instance = [ObservingInputAccessoryView new];
+            instance = [ObservingInputAccessoryViewManager new];
         }
     });
     
     return instance;
+}
+
+@end
+
+@implementation ObservingInputAccessoryView
+{
+    CGFloat _previousKeyboardHeight;
 }
 
 - (instancetype)init
@@ -39,8 +42,6 @@
         self.userInteractionEnabled = NO;
         self.translatesAutoresizingMaskIntoConstraints = NO;
 		self.autoresizingMask = UIViewAutoresizingFlexibleHeight;
-		
-        _delegates = [NSHashTable weakObjectsHashTable];
         
         [self registerForKeyboardNotifications];
 	}
@@ -89,10 +90,7 @@
         _previousKeyboardHeight = _keyboardHeight;
 		_keyboardHeight = MAX(0, self.window.bounds.size.height - (centerY - boundsH / 2) - self.intrinsicContentSize.height);
 		
-        [self enumerateDelegates:^(id<ObservingInputAccessoryViewDelegate> delegate)
-         {
-             [delegate observingInputAccessoryViewDidChangeFrame:self];
-         }];
+        [_delegate observingInputAccessoryViewDidChangeFrame:self];
 	}
 }
 
@@ -121,13 +119,10 @@
 	
 	[self invalidateIntrinsicContentSize];
     
-    [self enumerateDelegates:^(id<ObservingInputAccessoryViewDelegate> delegate)
-     {
-         if([delegate respondsToSelector:@selector(observingInputAccessoryViewKeyboardWillAppear:keyboardDelta:)])
-         {
-             [delegate observingInputAccessoryViewKeyboardWillAppear:self keyboardDelta:_keyboardHeight - _previousKeyboardHeight];
-         }
-     }];
+    if([_delegate respondsToSelector:@selector(observingInputAccessoryViewKeyboardWillAppear:keyboardDelta:)])
+    {
+        [_delegate observingInputAccessoryViewKeyboardWillAppear:self keyboardDelta:_keyboardHeight - _previousKeyboardHeight];
+    }
 }
 
 - (void)_keyboardDidShowNotification:(NSNotification*)notification
@@ -161,27 +156,9 @@
     CGRect endFrame = [notification.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
     _keyboardHeight = [UIScreen mainScreen].bounds.size.height - endFrame.origin.y;
     
-    [self enumerateDelegates:^(id<ObservingInputAccessoryViewDelegate> delegate)
-    {
-        [delegate observingInputAccessoryViewDidChangeFrame:self];
-    }];
+    [_delegate observingInputAccessoryViewDidChangeFrame:self];
     
 	[self invalidateIntrinsicContentSize];
-}
-
--(void)addDelegate:(id<ObservingInputAccessoryViewDelegate>)delegate
-{
-    [_delegates addObject:delegate];
-}
-
--(void) enumerateDelegates:(void (^)(id<ObservingInputAccessoryViewDelegate> delegate))execute
-{
-    NSEnumerator *enumerator = [_delegates objectEnumerator];
-    id value;
-    while ((value = [enumerator nextObject]))
-    {
-        execute(value);
-    }
 }
 
 @end
