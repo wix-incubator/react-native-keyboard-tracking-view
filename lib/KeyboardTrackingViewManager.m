@@ -9,42 +9,10 @@
 #import "KeyboardTrackingViewManager.h"
 #import "ObservingInputAccessoryView.h"
 
-#if __has_include(<React/RCTTextView.h>)
-#import <React/RCTTextView.h>
-#else
-#import "RCTTextView.h"
-#endif
-
-#if __has_include(<React/RCTTextField.h>)
-#import <React/RCTTextField.h>
-#else
-#import "RCTTextField.h"
-#endif
-
-#if __has_include(<React/RCTScrollView.h>)
 #import <React/RCTScrollView.h>
-#else
-#import "RCTScrollView.h"
-#endif
-
-#if __has_include(<React/RCTBridge.h>)
 #import <React/RCTBridge.h>
-#else
-#import "RCTBridge.h"
-#endif
-
-
-#if __has_include(<React/RCTUIManager.h>)
 #import <React/RCTUIManager.h>
-#else
-#import "RCTUIManager.h"
-#endif
-
-#if __has_include(<React/UIView+React.h>)
 #import <React/UIView+React.h>
-#else
-#import "UIView+React.h"
-#endif
 
 #import <objc/runtime.h>
 
@@ -183,16 +151,17 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
             }
         }
         
-        if ([subview isKindOfClass:[RCTTextField class]])
+        if ([subview isKindOfClass:NSClassFromString(@"RCTTextField")])
         {
-            [((RCTTextField*)subview) setInputAccessoryView:_observingInputAccessoryView];
-            [((RCTTextField*)subview) reloadInputViews];
+            UITextField *textField =  [subview valueForKey:@"_backedTextInput"];
+            [textField setInputAccessoryView:_observingInputAccessoryView];
+            [textField reloadInputViews];
             
             [_inputViewsMap setObject:subview forKey:@(kInputViewKey)];
         }
-        else if ([subview isKindOfClass:[RCTTextView class]])
+        else if ([subview isKindOfClass:NSClassFromString(@"RCTTextView")])
         {
-            UITextView *textView = [subview valueForKey:@"_textView"];
+            UITextView *textView = [subview valueForKey:@"_backedTextInput"];
             if (textView != nil)
             {
                 [textView setInputAccessoryView:_observingInputAccessoryView];

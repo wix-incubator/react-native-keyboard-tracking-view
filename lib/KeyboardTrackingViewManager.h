@@ -7,18 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
-
-#if __has_include(<React/RCTViewManager.h>)
 #import <React/RCTViewManager.h>
-#else
-#import "RCTViewManager.h"
-#endif
-
-#if __has_include(<React/RCTBridgeModule.h>)
 #import <React/RCTBridgeModule.h>
-#else
-#import "RCTBridgeModule.h"
-#endif
 
 @interface KeyboardTrackingViewManager : RCTViewManager
 @end

@@ -1,5 +1,13 @@
-import React, {Component} from 'react';
+import React, {PureComponent} from 'react';
 import {View} from 'react-native';
 
-const KeyboardTrackingView = (props) => <View {...props} />;
-export default KeyboardTrackingView;
+export default class KeyboardTrackingView extends PureComponent {
+  constructor(props) {
+    super(props);
+  }
+  render() {
+    return (
+      <View {...this.props} />
+    );
+  }
+}
