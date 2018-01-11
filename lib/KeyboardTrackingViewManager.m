@@ -372,15 +372,7 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
             }
         }
         
-        if([inputView respondsToSelector:@selector(reactWillMakeFirstResponder)])
-        {
-            [inputView performSelector:@selector(reactWillMakeFirstResponder)];
-        }
-        [inputView becomeFirstResponder];
-        if([inputView respondsToSelector:@selector(reactDidMakeFirstResponder)])
-        {
-            [inputView performSelector:@selector(reactDidMakeFirstResponder)];
-        }
+        [inputView reactFocus];
     }
 }
 
