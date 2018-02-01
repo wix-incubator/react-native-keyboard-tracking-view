@@ -287,7 +287,9 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
     if(self.scrollViewToManage != nil)
     {
         UIEdgeInsets insets = self.scrollViewToManage.contentInset;
-        CGFloat bottomInset = MAX(self.bounds.size.height, _observingInputAccessoryView.keyboardHeight + _observingInputAccessoryView.height);
+        CGFloat bottomSafeArea = [self getBottomSafeArea];
+        CGFloat bottomInset = MAX(self.bounds.size.height, _observingInputAccessoryView.keyboardHeight + _observingInputAccessoryView.height) + bottomSafeArea;
+        
         CGFloat originalBottomInset = self.scrollIsInverted ? insets.top : insets.bottom;
         CGPoint originalOffset = self.scrollViewToManage.contentOffset;
         if(self.scrollIsInverted)
@@ -316,7 +318,7 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
             self.scrollViewToManage.contentOffset = CGPointMake(originalOffset.x, originalOffset.y + insetsDiff);
         }
         
-        insets = self.scrollViewToManage.scrollIndicatorInsets;
+        insets = self.scrollViewToManage.contentInset;
         if(self.scrollIsInverted)
         {
             insets.top = bottomInset;
@@ -325,8 +327,28 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
         {
             insets.bottom = bottomInset;
         }
+        insets.bottom -= bottomSafeArea;
+        
         self.scrollViewToManage.scrollIndicatorInsets = insets;
     }
+}
+
+#pragma mark - safe area
+
+-(void)safeAreaInsetsDidChange
+{
+    [self updateTransformAndInsets];
+}
+
+-(CGFloat)getBottomSafeArea
+{
+    CGFloat bottomSafeArea = 0;
+#if __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_10_3
+    if (@available(iOS 11.0, *)) {
+        bottomSafeArea = self.superview ? self.superview.safeAreaInsets.bottom : self.safeAreaInsets.bottom;
+    }
+#endif
+    return bottomSafeArea;
 }
 
 #pragma RCTRootView notifications
@@ -343,12 +365,16 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
 
 #pragma mark - ObservingInputAccessoryViewDelegate methods
 
+-(void)updateTransformAndInsets
+{
+    CGFloat accessoryTranslation = MIN(-[self getBottomSafeArea], -_observingInputAccessoryView.keyboardHeight);
+    self.transform = CGAffineTransformMakeTranslation(0, accessoryTranslation);
+    [self _updateScrollViewInsets];
+}
+
 - (void)observingInputAccessoryViewDidChangeFrame:(ObservingInputAccessoryView*)observingInputAccessoryView
 {
-    CGFloat accessoryTranslation = MIN(0, -_observingInputAccessoryView.keyboardHeight);
-    self.transform = CGAffineTransformMakeTranslation(0, accessoryTranslation);
-    
-    [self _updateScrollViewInsets];
+    [self updateTransformAndInsets];
 }
 
 #pragma mark - UIScrollViewDelegate methods
