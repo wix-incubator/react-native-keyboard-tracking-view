@@ -288,16 +288,18 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
     {
         UIEdgeInsets insets = self.scrollViewToManage.contentInset;
         CGFloat bottomSafeArea = [self getBottomSafeArea];
-        CGFloat bottomInset = MAX(self.bounds.size.height, _observingInputAccessoryView.keyboardHeight + _observingInputAccessoryView.height) + bottomSafeArea;
+        CGFloat bottomInset = MAX(self.bounds.size.height, _observingInputAccessoryView.keyboardHeight + _observingInputAccessoryView.height);
         
         CGFloat originalBottomInset = self.scrollIsInverted ? insets.top : insets.bottom;
         CGPoint originalOffset = self.scrollViewToManage.contentOffset;
         if(self.scrollIsInverted)
         {
+            bottomInset += (_observingInputAccessoryView.keyboardHeight == 0 ? bottomSafeArea : 0);
             insets.top = bottomInset;
         }
         else
         {
+            bottomInset -= (_observingInputAccessoryView.keyboardHeight == 0 ? 0 : bottomSafeArea);
             insets.bottom = bottomInset;
         }
         self.scrollViewToManage.contentInset = insets;
@@ -327,8 +329,6 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
         {
             insets.bottom = bottomInset;
         }
-        insets.bottom -= bottomSafeArea;
-        
         self.scrollViewToManage.scrollIndicatorInsets = insets;
     }
 }
