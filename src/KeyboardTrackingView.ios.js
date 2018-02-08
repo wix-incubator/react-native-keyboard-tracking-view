@@ -18,12 +18,11 @@ export default class KeyboardTrackingView extends PureComponent {
     );
   }
 
-  getNativeProps(callback) {
+  async getNativeProps() {
     if (this.ref && KeyboardTrackingViewManager && KeyboardTrackingViewManager.getNativeProps) {
-      KeyboardTrackingViewManager.getNativeProps(ReactNative.findNodeHandle(this.ref), callback);
-    } else {
-      callback({});
+      return await KeyboardTrackingViewManager.getNativeProps(ReactNative.findNodeHandle(this.ref));
     }
+    return {};
   }
 
   scrollToStart() {

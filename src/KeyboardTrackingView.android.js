@@ -10,8 +10,8 @@ export default class KeyboardTrackingView extends PureComponent {
       <View {...this.props} />
     );
   }
-  getNativeProps(callback) {
-    callback({trackingViewHeight: 0, keyboardHeight: 0, contentTopInset: 0});
+  async getNativeProps() {
+    return {trackingViewHeight: 0, keyboardHeight: 0, contentTopInset: 0};
   }
   scrollToStart() {}
 }

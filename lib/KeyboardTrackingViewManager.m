@@ -19,7 +19,7 @@
 
 NSUInteger const kInputViewKey = 101010;
 NSUInteger const kMaxDeferedInitializeAccessoryViews = 15;
-
+NSInteger  const kTrackingViewNotFoundErrorCode = 1;
 
 typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
     KeyboardTrackingScrollBehaviorNone,
@@ -469,25 +469,22 @@ RCT_REMAP_VIEW_PROPERTY(requiresSameParentToManageScrollView, requiresSameParent
     return [[KeyboardTrackingView alloc] init];
 }
 
-RCT_EXPORT_METHOD(getNativeProps:(nonnull NSNumber *)reactTag
-                  callback:(RCTResponseSenderBlock)callback)
+RCT_EXPORT_METHOD(getNativeProps:(nonnull NSNumber *)reactTag resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
-    if (callback == nil) {
-        return;
-    }
-    
     [self.bridge.uiManager addUIBlock:
      ^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, KeyboardTrackingView *> *viewRegistry) {
          
          KeyboardTrackingView *view = viewRegistry[reactTag];
          if (!view || ![view isKindOfClass:[KeyboardTrackingView class]]) {
-             RCTLogError(@"Cannot find KeyboardTrackingView with tag #%@", reactTag);
+             NSString *errorMessage = [NSString stringWithFormat:@"Error: cannot find KeyboardTrackingView with tag #%@", reactTag];
+             RCTLogError(@"%@", errorMessage);
+             [self rejectPromise:reject withErrorMessage:errorMessage errorCode:kTrackingViewNotFoundErrorCode];
              return;
          }
-         
-         callback(@[@{@"trackingViewHeight": @(view.bounds.size.height),
-                      @"keyboardHeight": @([view getKeyboardHeight]),
-                      @"contentTopInset": @([view getScrollViewTopContentInset])}]);
+
+         resolve(@{@"trackingViewHeight": @(view.bounds.size.height),
+                   @"keyboardHeight": @([view getKeyboardHeight]),
+                   @"contentTopInset": @([view getScrollViewTopContentInset])});
      }];
 }
 
@@ -498,12 +495,21 @@ RCT_EXPORT_METHOD(scrollToStart:(nonnull NSNumber *)reactTag)
          
          KeyboardTrackingView *view = viewRegistry[reactTag];
          if (!view || ![view isKindOfClass:[KeyboardTrackingView class]]) {
-             RCTLogError(@"Cannot find KeyboardTrackingView with tag #%@", reactTag);
+             RCTLogError(@"Error: cannot find KeyboardTrackingView with tag #%@", reactTag);
              return;
          }
          
          [view scrollToStart];
      }];
+}
+
+#pragma mark - helper methods
+
+-(void)rejectPromise:(RCTPromiseRejectBlock)reject withErrorMessage:(NSString*)errorMessage errorCode:(NSInteger)errorCode
+{
+    NSString *errorDescription = NSLocalizedString(errorMessage, nil);
+    NSError *error = [NSError errorWithDomain:@"com.keyboardTrackingView" code:errorCode userInfo:@{NSLocalizedFailureReasonErrorKey: errorDescription}];
+    reject([NSString stringWithFormat:@"%ld", (long)errorCode], errorDescription, error);
 }
 
 @end
