@@ -417,6 +417,24 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
     self.isDraggingScrollView = NO;
 }
 
+- (CGFloat)getKeyboardHeight
+{
+    return _observingInputAccessoryView ? _observingInputAccessoryView.keyboardHeight : 0;
+}
+
+-(CGFloat)getScrollViewTopContentInset
+{
+    return (self.scrollViewToManage != nil) ? -self.scrollViewToManage.contentInset.top : 0;
+}
+
+-(void)scrollToStart
+{
+    if (self.scrollViewToManage != nil)
+    {
+        [self.scrollViewToManage setContentOffset:CGPointMake(self.scrollViewToManage.contentOffset.x, -self.scrollViewToManage.contentInset.top) animated:YES];
+    }
+}
+
 @end
 
 @implementation RCTConvert (KeyboardTrackingScrollBehavior)
@@ -449,6 +467,43 @@ RCT_REMAP_VIEW_PROPERTY(requiresSameParentToManageScrollView, requiresSameParent
 - (UIView *)view
 {
     return [[KeyboardTrackingView alloc] init];
+}
+
+RCT_EXPORT_METHOD(getNativeProps:(nonnull NSNumber *)reactTag
+                  callback:(RCTResponseSenderBlock)callback)
+{
+    if (callback == nil) {
+        return;
+    }
+    
+    [self.bridge.uiManager addUIBlock:
+     ^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, KeyboardTrackingView *> *viewRegistry) {
+         
+         KeyboardTrackingView *view = viewRegistry[reactTag];
+         if (!view || ![view isKindOfClass:[KeyboardTrackingView class]]) {
+             RCTLogError(@"Cannot find KeyboardTrackingView with tag #%@", reactTag);
+             return;
+         }
+         
+         callback(@[@{@"trackingViewHeight": @(view.bounds.size.height),
+                      @"keyboardHeight": @([view getKeyboardHeight]),
+                      @"contentTopInset": @([view getScrollViewTopContentInset])}]);
+     }];
+}
+
+RCT_EXPORT_METHOD(scrollToStart:(nonnull NSNumber *)reactTag)
+{
+    [self.bridge.uiManager addUIBlock:
+     ^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, KeyboardTrackingView *> *viewRegistry) {
+         
+         KeyboardTrackingView *view = viewRegistry[reactTag];
+         if (!view || ![view isKindOfClass:[KeyboardTrackingView class]]) {
+             RCTLogError(@"Cannot find KeyboardTrackingView with tag #%@", reactTag);
+             return;
+         }
+         
+         [view scrollToStart];
+     }];
 }
 
 @end
