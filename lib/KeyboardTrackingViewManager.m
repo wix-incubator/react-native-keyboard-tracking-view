@@ -72,7 +72,14 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
     
     return self;
 }
-
+- (dispatch_queue_t)methodQueue
+{
+    return dispatch_get_main_queue();
+}
++ (BOOL)requiresMainQueueSetup
+{
+    return YES;
+}
 -(RCTRootView*)getRootView
 {
     UIView *view = self;
@@ -159,7 +166,7 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
             
             [_inputViewsMap setObject:subview forKey:@(kInputViewKey)];
         }
-        else if ([subview isKindOfClass:NSClassFromString(@"RCTTextView")])
+        else if ([subview isKindOfClass:NSClassFromString(@"RCTUITextView")])
         {
             UITextView *textView = [subview valueForKey:@"_backedTextInput"];
             if (textView != nil)
