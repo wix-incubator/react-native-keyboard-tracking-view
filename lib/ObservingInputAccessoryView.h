@@ -29,6 +29,7 @@ typedef NS_ENUM(NSUInteger, KeyboardState) {
 @optional
 
 - (void)observingInputAccessoryViewKeyboardWillAppear:(ObservingInputAccessoryView*)observingInputAccessoryView keyboardDelta:(CGFloat)delta;
+- (void)observingInputAccessoryViewKeyboardWillDisappear:(ObservingInputAccessoryView*)observingInputAccessoryView;
 
 @end
 

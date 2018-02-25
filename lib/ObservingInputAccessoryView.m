@@ -137,6 +137,11 @@
 	_keyboardState = KeyboardStateWillHide;
 	
 	[self invalidateIntrinsicContentSize];
+    
+    if([_delegate respondsToSelector:@selector(observingInputAccessoryViewKeyboardWillDisappear:)])
+    {
+        [_delegate observingInputAccessoryViewKeyboardWillDisappear:self];
+    }
 }
 
 - (void)_keyboardDidHideNotification:(NSNotification*)notification

@@ -20,6 +20,7 @@
 NSUInteger const kInputViewKey = 101010;
 NSUInteger const kMaxDeferedInitializeAccessoryViews = 15;
 NSInteger  const kTrackingViewNotFoundErrorCode = 1;
+NSInteger  const kBottomViewHeight = 100;
 
 typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
     KeyboardTrackingScrollBehaviorNone,
@@ -32,6 +33,8 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
     Class _newClass;
     NSMapTable *_inputViewsMap;
     ObservingInputAccessoryView *_observingInputAccessoryView;
+    UIView *_bottomView;
+    CGFloat _bottomViewHeight;
 }
 
 @property (nonatomic, strong) UIScrollView *scrollViewToManage;
@@ -43,6 +46,7 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
 @property (nonatomic) NSUInteger deferedInitializeAccessoryViewsCount;
 @property (nonatomic) CGFloat originalHeight;
 @property (nonatomic) KeyboardTrackingScrollBehavior scrollBehavior;
+@property (nonatomic) BOOL addBottomView;
 
 @end
 
@@ -66,6 +70,10 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
         _observingInputAccessoryView.delegate = self;
         
         _manageScrollView = YES;
+        
+        _bottomViewHeight = kBottomViewHeight;
+        
+        self.addBottomView = NO;
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(rctContentDidAppearNotification:) name:RCTContentDidAppearNotification object:nil];
     }
@@ -117,6 +125,12 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
     
     object_setClass(subview, _newClass);
     [subview reloadInputViews];
+}
+
+-(void)layoutSubviews
+{
+    [super layoutSubviews];
+    [self updateBottomViewFrame];
 }
 
 - (void)initializeAccessoryViewsAndHandleInsets
@@ -189,6 +203,8 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
     [self _updateScrollViewInsets];
     
     _originalHeight = _observingInputAccessoryView.height;
+    
+    [self addBottomViewIfNecessary];
 }
 
 -(void) deferedInitializeAccessoryViewsAndHandleInsets
@@ -243,6 +259,12 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context
 {
     _observingInputAccessoryView.height = self.bounds.size.height;
+}
+
+- (void)observingInputAccessoryViewKeyboardWillDisappear:(ObservingInputAccessoryView *)observingInputAccessoryView
+{
+    _bottomViewHeight = kBottomViewHeight;
+    [self updateBottomViewFrame];
 }
 
 - (NSArray*)getBreadthFirstSubviewsForView:(UIView*)view
@@ -333,6 +355,38 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
     }
 }
 
+#pragma mark - bottom view
+
+-(void)setAddBottomView:(BOOL)addBottomView
+{
+    _addBottomView = addBottomView;
+    [self addBottomViewIfNecessary];
+}
+
+-(void)addBottomViewIfNecessary
+{
+    if (self.addBottomView && _bottomView == nil)
+    {
+        _bottomView = [UIView new];
+        _bottomView.backgroundColor = [UIColor whiteColor];
+        [self addSubview:_bottomView];
+        [self updateBottomViewFrame];
+    }
+    else if (!self.addBottomView && _bottomView != nil)
+    {
+        [_bottomView removeFromSuperview];
+        _bottomView = nil;
+    }
+}
+
+-(void)updateBottomViewFrame
+{
+    if (_bottomView != nil)
+    {
+        _bottomView.frame = CGRectMake(0, self.frame.size.height, self.frame.size.width, _bottomViewHeight);
+    }
+}
+
 #pragma mark - safe area
 
 -(void)safeAreaInsetsDidChange
@@ -367,7 +421,16 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
 
 -(void)updateTransformAndInsets
 {
-    CGFloat accessoryTranslation = MIN(-[self getBottomSafeArea], -_observingInputAccessoryView.keyboardHeight);
+    CGFloat bottomSafeArea = [self getBottomSafeArea];
+    CGFloat accessoryTranslation = MIN(-bottomSafeArea, -_observingInputAccessoryView.keyboardHeight);
+    
+    if (_observingInputAccessoryView.keyboardHeight <= bottomSafeArea) {
+        _bottomViewHeight = kBottomViewHeight;
+    } else if (_observingInputAccessoryView.keyboardState != KeyboardStateWillHide) {
+        _bottomViewHeight = 0;
+    }
+    [self updateBottomViewFrame];
+    
     self.transform = CGAffineTransformMakeTranslation(0, accessoryTranslation);
     [self _updateScrollViewInsets];
 }
@@ -375,6 +438,15 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
 - (void)observingInputAccessoryViewDidChangeFrame:(ObservingInputAccessoryView*)observingInputAccessoryView
 {
     [self updateTransformAndInsets];
+}
+
+- (void) observingInputAccessoryViewKeyboardWillAppear:(ObservingInputAccessoryView *)observingInputAccessoryView keyboardDelta:(CGFloat)delta
+{
+    if (observingInputAccessoryView.keyboardHeight > 0) //prevent hiding the bottom view if an external keyboard is in use
+    {
+        _bottomViewHeight = 0;
+        [self updateBottomViewFrame];
+    }
 }
 
 #pragma mark - UIScrollViewDelegate methods
@@ -454,6 +526,7 @@ RCT_REMAP_VIEW_PROPERTY(scrollBehavior, scrollBehavior, KeyboardTrackingScrollBe
 RCT_REMAP_VIEW_PROPERTY(revealKeyboardInteractive, revealKeyboardInteractive, BOOL)
 RCT_REMAP_VIEW_PROPERTY(manageScrollView, manageScrollView, BOOL)
 RCT_REMAP_VIEW_PROPERTY(requiresSameParentToManageScrollView, requiresSameParentToManageScrollView, BOOL)
+RCT_REMAP_VIEW_PROPERTY(addBottomView, addBottomView, BOOL)
 
 - (NSDictionary<NSString *, id> *)constantsToExport
 {
