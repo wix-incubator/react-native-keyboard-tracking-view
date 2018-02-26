@@ -391,7 +391,11 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
 
 -(void)safeAreaInsetsDidChange
 {
-    [super safeAreaInsetsDidChange];
+#if __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_10_3
+    if (@available(iOS 11.0, *)) {
+        [super safeAreaInsetsDidChange];
+    }
+#endif
     [self updateTransformAndInsets];
 }
 
