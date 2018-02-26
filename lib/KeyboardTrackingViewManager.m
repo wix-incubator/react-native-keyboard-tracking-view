@@ -391,6 +391,7 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
 
 -(void)safeAreaInsetsDidChange
 {
+    [super safeAreaInsetsDidChange];
     [self updateTransformAndInsets];
 }
 
