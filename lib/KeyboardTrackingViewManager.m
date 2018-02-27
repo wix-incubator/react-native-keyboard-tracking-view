@@ -332,7 +332,6 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
         }
         else
         {
-            bottomInset -= (_observingInputAccessoryView.keyboardHeight == 0 ? 0 : bottomSafeArea);
             insets.bottom = bottomInset;
         }
         self.scrollViewToManage.contentInset = insets;
