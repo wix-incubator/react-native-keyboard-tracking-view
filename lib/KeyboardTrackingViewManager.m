@@ -325,9 +325,10 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
         
         CGFloat originalBottomInset = self.scrollIsInverted ? insets.top : insets.bottom;
         CGPoint originalOffset = self.scrollViewToManage.contentOffset;
+        
+        bottomInset += (_observingInputAccessoryView.keyboardHeight == 0 ? bottomSafeArea : 0);
         if(self.scrollIsInverted)
         {
-            bottomInset += (_observingInputAccessoryView.keyboardHeight == 0 ? bottomSafeArea : 0);
             insets.top = bottomInset;
         }
         else
