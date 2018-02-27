@@ -11,6 +11,8 @@
 		D834CEEF1CC650F000FA5668 /* ObservingInputAccessoryView.m in Sources */ = {isa = PBXBuildFile; fileRef = D834CEED1CC650F000FA5668 /* ObservingInputAccessoryView.m */; };
 		D8904E471EA63900001198F0 /* ObservingInputAccessoryView.h in Headers */ = {isa = PBXBuildFile; fileRef = D834CEEC1CC650F000FA5668 /* ObservingInputAccessoryView.h */; };
 		D8904F521EA796A9001198F0 /* ObservingInputAccessoryView.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = D834CEEC1CC650F000FA5668 /* ObservingInputAccessoryView.h */; };
+		D8E5A4372044BF6F0000DA01 /* UIResponder+FirstResponder.h in Headers */ = {isa = PBXBuildFile; fileRef = D8E5A4352044BF6F0000DA01 /* UIResponder+FirstResponder.h */; };
+		D8E5A4382044BF6F0000DA01 /* UIResponder+FirstResponder.m in Sources */ = {isa = PBXBuildFile; fileRef = D8E5A4362044BF6F0000DA01 /* UIResponder+FirstResponder.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -32,6 +34,8 @@
 		D834CEEB1CC650F000FA5668 /* KeyboardTrackingViewManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KeyboardTrackingViewManager.m; sourceTree = "<group>"; };
 		D834CEEC1CC650F000FA5668 /* ObservingInputAccessoryView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ObservingInputAccessoryView.h; sourceTree = "<group>"; };
 		D834CEED1CC650F000FA5668 /* ObservingInputAccessoryView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ObservingInputAccessoryView.m; sourceTree = "<group>"; };
+		D8E5A4352044BF6F0000DA01 /* UIResponder+FirstResponder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIResponder+FirstResponder.h"; sourceTree = "<group>"; };
+		D8E5A4362044BF6F0000DA01 /* UIResponder+FirstResponder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIResponder+FirstResponder.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -48,6 +52,8 @@
 		D834CECF1CC64F2400FA5668 = {
 			isa = PBXGroup;
 			children = (
+				D8E5A4352044BF6F0000DA01 /* UIResponder+FirstResponder.h */,
+				D8E5A4362044BF6F0000DA01 /* UIResponder+FirstResponder.m */,
 				D834CEEA1CC650F000FA5668 /* KeyboardTrackingViewManager.h */,
 				D834CEEB1CC650F000FA5668 /* KeyboardTrackingViewManager.m */,
 				D834CEEC1CC650F000FA5668 /* ObservingInputAccessoryView.h */,
@@ -72,6 +78,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D8904E471EA63900001198F0 /* ObservingInputAccessoryView.h in Headers */,
+				D8E5A4372044BF6F0000DA01 /* UIResponder+FirstResponder.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -134,6 +141,7 @@
 			files = (
 				D834CEEF1CC650F000FA5668 /* ObservingInputAccessoryView.m in Sources */,
 				D834CEEE1CC650F000FA5668 /* KeyboardTrackingViewManager.m in Sources */,
+				D8E5A4382044BF6F0000DA01 /* UIResponder+FirstResponder.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

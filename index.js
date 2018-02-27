@@ -1,3 +1,3 @@
 import KeyboardTrackingView from './src/KeyboardTrackingView';
-
-export { KeyboardTrackingView };
+import KeyboardAwareInsetsView from './src/KeyboardAwareInsetsView';
+export {KeyboardTrackingView, KeyboardAwareInsetsView};

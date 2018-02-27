@@ -8,6 +8,7 @@
 
 #import "KeyboardTrackingViewManager.h"
 #import "ObservingInputAccessoryView.h"
+#import "UIResponder+FirstResponder.h"
 
 #import <React/RCTScrollView.h>
 #import <React/RCTBridge.h>
@@ -47,6 +48,7 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
 @property (nonatomic) CGFloat originalHeight;
 @property (nonatomic) KeyboardTrackingScrollBehavior scrollBehavior;
 @property (nonatomic) BOOL addBottomView;
+@property (nonatomic) BOOL scrollToFocusedInput;
 
 @end
 
@@ -74,6 +76,7 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
         _bottomViewHeight = kBottomViewHeight;
         
         self.addBottomView = NO;
+        self.scrollToFocusedInput = NO;
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(rctContentDidAppearNotification:) name:RCTContentDidAppearNotification object:nil];
     }
@@ -199,6 +202,14 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
             break;
         }
     }
+    
+#if __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_10_3
+    if (@available(iOS 11.0, *)) {
+        if (_scrollViewToManage != nil) {
+            _scrollViewToManage.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+        }
+    }
+#endif
     
     [self _updateScrollViewInsets];
     
@@ -440,6 +451,24 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
     [self _updateScrollViewInsets];
 }
 
+- (void)performScrollToFocusedInput
+{
+    if (_scrollViewToManage != nil && self.scrollToFocusedInput)
+    {
+        UIResponder *currentFirstResponder = [UIResponder currentFirstResponder];
+        if (currentFirstResponder != nil && [currentFirstResponder isKindOfClass:[UIView class]])
+        {
+            UIView *reponderView = (UIView*)currentFirstResponder;
+            if ([reponderView isDescendantOfView:_scrollViewToManage])
+            {
+                CGRect frame = [_scrollViewToManage convertRect:reponderView.frame fromView:reponderView];
+                frame = CGRectMake(frame.origin.x, frame.origin.y, frame.size.width, frame.size.height + 20);
+                [_scrollViewToManage scrollRectToVisible:frame animated:NO];
+            }
+        }
+    }
+}
+
 - (void)observingInputAccessoryViewDidChangeFrame:(ObservingInputAccessoryView*)observingInputAccessoryView
 {
     [self updateTransformAndInsets];
@@ -452,6 +481,8 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
         _bottomViewHeight = 0;
         [self updateBottomViewFrame];
     }
+    
+    [self performScrollToFocusedInput];
 }
 
 #pragma mark - UIScrollViewDelegate methods
@@ -532,6 +563,7 @@ RCT_REMAP_VIEW_PROPERTY(revealKeyboardInteractive, revealKeyboardInteractive, BO
 RCT_REMAP_VIEW_PROPERTY(manageScrollView, manageScrollView, BOOL)
 RCT_REMAP_VIEW_PROPERTY(requiresSameParentToManageScrollView, requiresSameParentToManageScrollView, BOOL)
 RCT_REMAP_VIEW_PROPERTY(addBottomView, addBottomView, BOOL)
+RCT_REMAP_VIEW_PROPERTY(scrollToFocusedInput, scrollToFocusedInput, BOOL)
 
 - (NSDictionary<NSString *, id> *)constantsToExport
 {
