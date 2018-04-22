@@ -50,6 +50,7 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
 @property (nonatomic) KeyboardTrackingScrollBehavior scrollBehavior;
 @property (nonatomic) BOOL addBottomView;
 @property (nonatomic) BOOL scrollToFocusedInput;
+@property (nonatomic) BOOL allowHitsOutsideBounds;
 
 @end
 
@@ -73,6 +74,7 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
         _observingInputAccessoryView.delegate = self;
         
         _manageScrollView = YES;
+        _allowHitsOutsideBounds = NO;
         
         _bottomViewHeight = kBottomViewHeight;
         
@@ -100,6 +102,30 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
         return (RCTRootView*)view;
     }
     return nil;
+}
+
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
+    if (!_allowHitsOutsideBounds) {
+        return [super hitTest:point withEvent:event];
+    }
+    
+    if (self.isHidden || self.alpha == 0 || self.clipsToBounds) {
+        return nil;
+    }
+    
+    UIView *subview = [super hitTest:point withEvent:event];
+    if (subview == nil) {
+        NSArray<UIView*>* allSubviews = [self getBreadthFirstSubviewsForView:self];
+        for (UIView *tmpSubview in allSubviews) {
+            CGPoint pointInSubview = [self convertPoint:point toView:tmpSubview];
+            if ([tmpSubview pointInside:pointInSubview withEvent:event]) {
+                subview = tmpSubview;
+                break;
+            }
+        }
+    }
+    
+    return subview;
 }
 
 -(void)_swizzleWebViewInputAccessory:(UIWebView*)webview
@@ -603,6 +629,7 @@ RCT_REMAP_VIEW_PROPERTY(manageScrollView, manageScrollView, BOOL)
 RCT_REMAP_VIEW_PROPERTY(requiresSameParentToManageScrollView, requiresSameParentToManageScrollView, BOOL)
 RCT_REMAP_VIEW_PROPERTY(addBottomView, addBottomView, BOOL)
 RCT_REMAP_VIEW_PROPERTY(scrollToFocusedInput, scrollToFocusedInput, BOOL)
+RCT_REMAP_VIEW_PROPERTY(allowHitsOutsideBounds, allowHitsOutsideBounds, BOOL)
 
 - (NSDictionary<NSString *, id> *)constantsToExport
 {
