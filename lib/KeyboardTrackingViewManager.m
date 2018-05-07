@@ -640,6 +640,11 @@ RCT_REMAP_VIEW_PROPERTY(allowHitsOutsideBounds, allowHitsOutsideBounds, BOOL)
              };
 }
 
++ (BOOL)requiresMainQueueSetup
+{
+    return YES;
+}
+
 - (UIView *)view
 {
     return [[KeyboardTrackingView alloc] init];
