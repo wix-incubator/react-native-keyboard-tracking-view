@@ -86,6 +86,7 @@
         }
         
         CGFloat bottomPadding = 0;
+        CGFloat boundsH = self.superview.bounds.size.height;
         
         if (@available(iOS 11.0, *)) {
             UIWindow *window = UIApplication.sharedApplication.keyWindow;
