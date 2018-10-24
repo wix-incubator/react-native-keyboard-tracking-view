@@ -25,6 +25,7 @@ const KeyboardToolbar = ({ onActionPress, onLayout, inputRefCallback, trackingRe
 	>
 		<BlurView blurType="xlight" style={styles.blurContainer}>
       <AutoGrowingTextInput
+        minHeight={38}
         maxHeight={200}
         style={styles.textInput}
         ref={(r) => inputRefCallback && inputRefCallback(r)}
@@ -88,19 +89,21 @@ const styles = StyleSheet.create({
 		flex: 1,
 		flexDirection: 'row',
 		alignItems: 'center',
-		justifyContent: 'space-between'
+		justifyContent: 'space-between',
+    paddingLeft: 15,
+    paddingRight: 15,
+    paddingTop: 5,
+    paddingBottom: 5
 	},
 	textInput: {
-		flex: 1,
-		height: 36,
-		marginLeft: 10,
-		marginTop: 10,
-		marginBottom: 10,
-		paddingLeft: 10,
-		fontSize: 17,
+    flex: 1,
+    fontSize: 17,
 		backgroundColor: 'white',
 		borderWidth: 0.5 / PixelRatio.get(),
-		borderRadius: 18
+		borderRadius: 19,
+    paddingTop: 8,
+    paddingBottom: 5,
+    paddingLeft: 15,
 	},
 	sendButton: {
 		paddingRight: 15,

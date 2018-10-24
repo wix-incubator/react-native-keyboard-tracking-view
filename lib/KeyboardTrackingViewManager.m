@@ -168,8 +168,8 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
     NSArray<UIView*>* allSubviews = [self getBreadthFirstSubviewsForView:[self getRootView]];
     NSMutableArray<RCTScrollView*>* rctScrollViewsArray = [NSMutableArray array];
     
-    for (UIView* subview in allSubviews) {
-        
+    for (UIView* subview in allSubviews)
+    {
         if(_manageScrollView)
         {
             if(_scrollViewToManage == nil)
@@ -207,21 +207,15 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
             {
                 textField = (UITextField*)subview;
             }
-            
-            if (textField != nil)
-            {
-                [textField setInputAccessoryView:_observingInputAccessoryView];
-                [textField reloadInputViews];
-                [_inputViewsMap setObject:subview forKey:@(kInputViewKey)];
-            }
+            [self setupTextField:textField];
         }
         else if ([subview isKindOfClass:NSClassFromString(@"RCTUITextField")] && [subview isKindOfClass:[UITextField class]])
         {
-            UITextField *textField = (UITextField*)subview;
-            [textField setInputAccessoryView:_observingInputAccessoryView];
-            [textField reloadInputViews];
-            
-            [_inputViewsMap setObject:textField forKey:@(kInputViewKey)];
+            [self setupTextField:(UITextField*)subview];
+        }
+        else if ([subview isKindOfClass:NSClassFromString(@"RCTMultilineTextInputView")])
+        {
+            [self setupTextView:[subview valueForKey:@"_backedTextInputView"]];
         }
         else if ([subview isKindOfClass:NSClassFromString(@"RCTTextView")])
         {
@@ -235,22 +229,11 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
             {
                 textView = (UITextView*)subview;
             }
-            
-            if (textView != nil)
-            {
-                [textView setInputAccessoryView:_observingInputAccessoryView];
-                [textView reloadInputViews];
-                
-                [_inputViewsMap setObject:textView forKey:@(kInputViewKey)];
-            }
+            [self setupTextView:textView];
         }
         else if ([subview isKindOfClass:NSClassFromString(@"RCTUITextView")] && [subview isKindOfClass:[UITextView class]])
         {
-            UITextView *textView = (UITextView*)subview;
-            [textView setInputAccessoryView:_observingInputAccessoryView];
-            [textView reloadInputViews];
-            
-            [_inputViewsMap setObject:textView forKey:@(kInputViewKey)];
+            [self setupTextView:(UITextView*)subview];
         }
         else if ([subview isKindOfClass:[UIWebView class]])
         {
@@ -281,6 +264,26 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
     _originalHeight = _observingInputAccessoryView.height;
     
     [self addBottomViewIfNecessary];
+}
+
+- (void)setupTextView:(UITextView*)textView
+{
+    if (textView != nil)
+    {
+        [textView setInputAccessoryView:_observingInputAccessoryView];
+        [textView reloadInputViews];
+        [_inputViewsMap setObject:textView forKey:@(kInputViewKey)];
+    }
+}
+
+- (void)setupTextField:(UITextField*)textField
+{
+    if (textField != nil)
+    {
+        [textField setInputAccessoryView:_observingInputAccessoryView];
+        [textField reloadInputViews];
+        [_inputViewsMap setObject:textField forKey:@(kInputViewKey)];
+    }
 }
 
 -(void) deferedInitializeAccessoryViewsAndHandleInsets
@@ -630,6 +633,11 @@ RCT_REMAP_VIEW_PROPERTY(requiresSameParentToManageScrollView, requiresSameParent
 RCT_REMAP_VIEW_PROPERTY(addBottomView, addBottomView, BOOL)
 RCT_REMAP_VIEW_PROPERTY(scrollToFocusedInput, scrollToFocusedInput, BOOL)
 RCT_REMAP_VIEW_PROPERTY(allowHitsOutsideBounds, allowHitsOutsideBounds, BOOL)
+
++ (BOOL)requiresMainQueueSetup
+{
+    return YES;
+}
 
 - (NSDictionary<NSString *, id> *)constantsToExport
 {
