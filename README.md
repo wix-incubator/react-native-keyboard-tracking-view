@@ -37,7 +37,7 @@ Now use it in your jsx as the parent of the views you whish to track the keyboar
 </KeyboardTrackingView>
 ```
 
-##Native Properties
+## Native Properties
 
 Attribute | Description
 -------- | -----------
