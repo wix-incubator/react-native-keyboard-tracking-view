@@ -7,6 +7,7 @@
 //
 
 #import "ObservingInputAccessoryView.h"
+#import <React/RCTView.h>
 
 @implementation ObservingInputAccessoryViewManager
 
@@ -89,7 +90,13 @@
         
         _previousKeyboardHeight = _keyboardHeight;
 		_keyboardHeight = MAX(0, self.window.bounds.size.height - (centerY - boundsH / 2) - self.intrinsicContentSize.height);
-		
+
+        CGFloat bottomLayout = [self getBottomLayoutGuide];
+
+        if (bottomLayout) {
+          _keyboardHeight -= bottomLayout;
+        }
+
         [_delegate observingInputAccessoryViewDidChangeFrame:self];
 	}
 }
@@ -164,6 +171,30 @@
     [_delegate observingInputAccessoryViewDidChangeFrame:self];
     
 	[self invalidateIntrinsicContentSize];
+}
+
+- (UIViewController *)reactViewController:(UIView *)view
+{
+  id responder = [view nextResponder];
+  while (responder) {
+    if ([responder isKindOfClass:[UIViewController class]]) {
+      if (((UIViewController*)responder).bottomLayoutGuide.length > 0) {
+        return responder;
+      }
+    }
+    responder = [responder nextResponder];
+  }
+  return nil;
+}
+
+- (CGFloat)getBottomLayoutGuide
+{
+  UIViewController *controller = [self reactViewController:self];
+  if (controller) {
+    return controller.bottomLayoutGuide.length;
+  }
+  
+  return 0;
 }
 
 @end
