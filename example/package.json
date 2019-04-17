@@ -10,6 +10,7 @@
     "react-native": "0.59.3",
     "react-native-autogrow-textinput": "^5.0.0",
     "react-native-blur": "^3.0.0",
-    "react-native-keyboard-tracking-view": "latest"
+    "react-native-keyboard-tracking-view": "latest",
+    "metro-react-native-babel-preset": "^0.53.1"
   }
 }
