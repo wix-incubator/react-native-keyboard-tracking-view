@@ -15,5 +15,5 @@ Pod::Spec.new do |s|
   s.requires_arc    = true
 
   s.source          = { :git => s.homepage, :tag => s.version }
-  s.source_files    = "ios/**/*.{h,m}"
+  s.source_files    = "lib/**/*.{h,m}"
 end
