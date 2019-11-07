@@ -5,7 +5,7 @@
  */
 import React, {Component} from 'react';
 import {AppRegistry, StyleSheet, Text, View, Image, ScrollView, TextInput, TouchableOpacity, Keyboard, Dimensions, PixelRatio} from 'react-native';
-import {BlurView} from 'react-native-blur';
+// import {BlurView} from 'react-native-blur';
 import {KeyboardTrackingView} from 'react-native-keyboard-tracking-view';
 import {AutoGrowingTextInput} from 'react-native-autogrow-textinput';
 
@@ -23,18 +23,19 @@ const KeyboardToolbar = ({ onActionPress, onLayout, inputRefCallback, trackingRe
 		trackInteractive={trackInteractive}
 		ref={(r) => trackingRefCallback && trackingRefCallback(r)}
 	>
-		<BlurView blurType="xlight" style={styles.blurContainer}>
+	
+		<View style={styles.inputContainer}>		
       <AutoGrowingTextInput
         minHeight={38}
         maxHeight={200}
         style={styles.textInput}
         ref={(r) => inputRefCallback && inputRefCallback(r)}
         placeholder={'Message'}
-      />
+				/>
 			<TouchableOpacity style={styles.sendButton} onPress={onActionPress}>
 				<Text>Action</Text>
 			</TouchableOpacity>
-		</BlurView>
+				</View>
 	</KeyboardTrackingView>;
 
 class example extends Component {
@@ -85,7 +86,7 @@ const styles = StyleSheet.create({
 		width: screenSize.width,
 		borderWidth: 0.5 / PixelRatio.get()
 	},
-	blurContainer: {
+	inputContainer: {
 		flex: 1,
 		flexDirection: 'row',
 		alignItems: 'center',
@@ -93,7 +94,8 @@ const styles = StyleSheet.create({
     paddingLeft: 15,
     paddingRight: 15,
     paddingTop: 5,
-    paddingBottom: 5
+		paddingBottom: 5,
+		backgroundColor: 'white'
 	},
 	textInput: {
     flex: 1,
@@ -111,4 +113,4 @@ const styles = StyleSheet.create({
 	}
 });
 
-AppRegistry.registerComponent('example', () => example);
+AppRegistry.registerComponent('ReactNativeKeyboardTrackingView', () => example);

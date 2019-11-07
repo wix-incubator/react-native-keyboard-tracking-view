@@ -6,11 +6,15 @@
     "start": "react-native start"
   },
   "dependencies": {
-    "react": "16.8.3",
-    "react-native": "0.59.3",
+    "metro-react-native-babel-preset": "^0.53.1",
+    "react": "16.9.0",
+    "react-native": "0.61.4",
     "react-native-autogrow-textinput": "^5.0.0",
-    "react-native-blur": "^3.0.0",
-    "react-native-keyboard-tracking-view": "latest",
-    "metro-react-native-babel-preset": "^0.53.1"
+    "react-native-keyboard-tracking-view": "latest"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.0",
+    "@babel/preset-env": "^7.3.1",
+    "@babel/runtime": "^7.4.2"
   }
 }
