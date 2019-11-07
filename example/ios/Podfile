@@ -3,7 +3,7 @@ require_relative '../node_modules/@react-native-community/cli-platform-ios/nativ
 
 target 'ReactNativeKeyboardTrackingView' do
 
-  pod 'ReactNativeKeyboardTrackingViewLib', :path => "../../ReactNativeKeyboardTrackingView.podspec"
+  pod 'ReactNativeKeyboardTrackingView', :path => "../../ReactNativeKeyboardTrackingView.podspec"
 
   # Pods for ReactNativeKeyboardTrackingView
   pod 'FBLazyVector', :path => "../node_modules/react-native/Libraries/FBLazyVector"
