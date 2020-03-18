@@ -17,6 +17,7 @@
 #import <React/RCTUIManagerUtils.h>
 
 #import <objc/runtime.h>
+#import <WebKit/WebKit.h>
 
 
 NSUInteger const kInputViewKey = 101010;
@@ -128,7 +129,7 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
     return subview;
 }
 
--(void)_swizzleWebViewInputAccessory:(UIWebView*)webview
+-(void)_swizzleWebViewInputAccessory:(WKWebView*)webview
 {
     UIView* subview;
     for (UIView* view in webview.scrollView.subviews)
@@ -235,9 +236,9 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
         {
             [self setupTextView:(UITextView*)subview];
         }
-        else if ([subview isKindOfClass:[UIWebView class]])
+        else if ([subview isKindOfClass:[WKWebView class]])
         {
-            [self _swizzleWebViewInputAccessory:(UIWebView*)subview];
+            [self _swizzleWebViewInputAccessory:(WKWebView*)subview];
         }
     }
     
