@@ -1,3 +1,15 @@
+# Important: deprecation alert
+This library is being deprecated, please start migrating to [RN-UILib](https://github.com/wix/react-native-ui-lib/).  
+If you want to try out our excelent (and constantly improving) UI compoenent library, please use:  
+```
+import {Keyboard} from 'react-native-ui-lib';
+const KeyboardTrackingView = Keyboard.KeyboardTrackingView;
+```
+If you don't need our UI solution, you can use only the `keyboard` pacakge:  
+```
+import {KeyboardTrackingView} from 'react-native-ui-lib/keyboard';
+```
+
 # react-native-keyboard-tracking-view
 A react native UI component that enables “keyboard tracking" for this view and it's sub-views. Would typically be used when you have a TextInput inside this view.
 
