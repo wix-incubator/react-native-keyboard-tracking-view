@@ -5,7 +5,7 @@ If you want to try out our excelent (and constantly improving) UI compoenent lib
 import {Keyboard} from 'react-native-ui-lib';
 const KeyboardTrackingView = Keyboard.KeyboardTrackingView;
 ```
-If you don't need our UI solution, you can use only the `keyboard` pacakge:  
+If you don't want to import the whole library, you can use only the `keyboard` package:  
 ```
 import {KeyboardTrackingView} from 'react-native-ui-lib/keyboard';
 ```
