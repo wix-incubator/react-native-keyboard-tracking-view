@@ -85,10 +85,16 @@
             centerY = [change[NSKeyValueChangeNewKey] CGPointValue].y;
         }
         
+        CGFloat bottomPadding = 0;
         CGFloat boundsH = self.superview.bounds.size.height;
         
+        if (@available(iOS 11.0, *)) {
+            UIWindow *window = UIApplication.sharedApplication.keyWindow;
+            bottomPadding = window.safeAreaInsets.bottom;
+        }
+        
         _previousKeyboardHeight = _keyboardHeight;
-		_keyboardHeight = MAX(0, self.window.bounds.size.height - (centerY - boundsH / 2) - self.intrinsicContentSize.height);
+		_keyboardHeight = MAX(0, self.window.bounds.size.height - (centerY - boundsH / 2) - self.intrinsicContentSize.height - bottomPadding);
 		
         [_delegate observingInputAccessoryViewDidChangeFrame:self];
 	}
