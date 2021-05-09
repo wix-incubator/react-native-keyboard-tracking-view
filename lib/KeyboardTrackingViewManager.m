@@ -18,6 +18,7 @@
 #import <React/RCTUIManagerUtils.h>
 
 #import <objc/runtime.h>
+#import <WebKit/WebKit.h>
 
 
 NSUInteger const kInputViewKey = 101010;
