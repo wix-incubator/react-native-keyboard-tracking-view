@@ -186,7 +186,7 @@ typedef NS_ENUM(NSUInteger, KeyboardTrackingScrollBehavior) {
                 
                 if(_scrollViewToManage != nil)
                 {
-                    _scrollIsInverted = CGAffineTransformEqualToTransform(_scrollViewToManage.superview.transform, CGAffineTransformMakeScale(1, -1));
+                    _scrollIsInverted = self.scrollIsInverted;
                 }
             }
             
@@ -630,6 +630,7 @@ RCT_EXPORT_MODULE()
 RCT_REMAP_VIEW_PROPERTY(scrollBehavior, scrollBehavior, KeyboardTrackingScrollBehavior)
 RCT_REMAP_VIEW_PROPERTY(revealKeyboardInteractive, revealKeyboardInteractive, BOOL)
 RCT_REMAP_VIEW_PROPERTY(manageScrollView, manageScrollView, BOOL)
+RCT_REMAP_VIEW_PROPERTY(scrollIsInverted, scrollIsInverted, BOOL)
 RCT_REMAP_VIEW_PROPERTY(requiresSameParentToManageScrollView, requiresSameParentToManageScrollView, BOOL)
 RCT_REMAP_VIEW_PROPERTY(addBottomView, addBottomView, BOOL)
 RCT_REMAP_VIEW_PROPERTY(scrollToFocusedInput, scrollToFocusedInput, BOOL)
